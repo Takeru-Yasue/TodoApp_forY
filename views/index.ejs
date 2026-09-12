@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>やることリスト</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #22c55e;
+            --success-hover: #16a34a;
+            --border: #e2e8f0;
+            --overdue-bg: #fff1f2;
+            --overdue-border: #fecdd3;
+            --overdue-text: #e11d48;
+            --approaching-bg: #fefce8;
+            --approaching-border: #fef08a;
+            --approaching-text: #a16207;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.025em;
+            color: var(--primary);
+        }
+
+        .todo-list {
+            list-style: none;
+            padding: 0.75rem;
+            margin: 0;
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            flex-grow: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            margin-bottom: 1rem;
+        }
+
+        /* スクロールバーのカスタマイズ（Chrome, Safariなど） */
+        .todo-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .todo-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .todo-list::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+
+        .todo-item {
+            background: var(--card-bg);
+            margin-bottom: 0.4rem;
+            padding: 1.1rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .todo-item.overdue {
+            background: var(--overdue-bg);
+            border-color: var(--overdue-border);
+        }
+
+        .todo-item.overdue .todo-title {
+            color: var(--overdue-text);
+        }
+
+        .todo-item.overdue .period-badge {
+            background: #ffe4e6;
+            color: var(--overdue-text);
+        }
+
+        .todo-item.approaching {
+            background: var(--approaching-bg);
+            border-color: var(--approaching-border);
+        }
+
+        .todo-item.approaching .todo-title {
+            color: var(--approaching-text);
+        }
+
+        .todo-item.approaching .period-badge {
+            background: #fef9c3;
+            color: var(--approaching-text);
+        }
+
+        .todo-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .todo-item:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .todo-info {
+            flex-grow: 1;
+        }
+
+        .todo-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .todo-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .overdue-label, .approaching-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+        }
+
+        .overdue-label {
+            background: var(--danger);
+            color: white;
+        }
+
+        .approaching-label {
+            background: var(--approaching-text);
+            color: white;
+        }
+
+        .period-badge {
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .todo-meta {
+            font-size: 1rem;
+            color: var(--text-main);
+            opacity: 0.8;
+        }
+
+        .complete-btn {
+            background: #fff;
+            border: 1px solid var(--border);
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+            margin-left: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .complete-btn:hover {
+            color: var(--success);
+            background: #f0fdf4;
+            border-color: var(--success);
+            box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
+        }
+
+        .add-card {
+            background: var(--card-bg);
+            padding: 0; /* ヘッダーとボディで個別にパディングを設定 */
+            border-radius: 16px;
+            box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .add-card-header {
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            transition: background 0.2s;
+        }
+
+        .add-card-header:hover {
+            background: #f8fafc;
+        }
+
+        .add-card h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .toggle-icon {
+            color: var(--text-muted);
+            transition: transform 0.3s;
+        }
+
+        .add-card.collapsed .toggle-icon {
+            transform: rotate(-180deg);
+        }
+
+        .add-card-body {
+            padding: 0 1.25rem 1.25rem 1.25rem;
+            max-height: 500px;
+            transition: max-height 0.3s ease-out, opacity 0.2s, padding 0.3s;
+            opacity: 1;
+            overflow: hidden;
+        }
+
+        .add-card.collapsed .add-card-body {
+            max-height: 0;
+            padding-bottom: 0;
+            padding-top: 0;
+            opacity: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s, ring 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 480px) {
+            .form-row {
+                gap: 0;
+            }
+            .form-row > .form-group {
+                flex: 1 0 100% !important;
+            }
+            
+            .add-card {
+                /* padding: 1rem; は削除。header/bodyで制御するため */
+            }
+
+            .add-card-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .add-card-body {
+                padding: 0 1rem 1rem 1rem;
+            }
+
+            .add-card.collapsed .add-card-body {
+                padding-bottom: 0;
+                padding-top: 0;
+            }
+        }
+
+        .submit-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+            margin-top: 0.25rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>やることリスト</h1>
+        </header>
+        
+        <ul class="todo-list">
+            <% if (todos.length === 0) { %>
+                <div class="empty-state">Todoはありません。新しいタスクを追加しましょう。</div>
+            <% } %>
+            <% 
+                const now = new Date();
+                const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+                todos.forEach(todo => { 
+                    const dueDate = new Date(todo.dueDate);
+                    const isOverdue = dueDate < now;
+                    const isApproaching = !isOverdue && dueDate < tomorrow;
+                    
+                    let statusClass = '';
+                    if (isOverdue) statusClass = 'overdue';
+                    else if (isApproaching) statusClass = 'approaching';
+            %>
+                <li class="todo-item <%= statusClass %>">
+                    <div class="todo-info">
+                        <div class="todo-header">
+                            <span class="todo-title"><%= todo.title %></span>
+                            <% if (isOverdue) { %>
+                                <span class="overdue-label">期限切れ</span>
+                            <% } else if (isApproaching) { %>
+                                <span class="approaching-label">期限間近</span>
+                            <% } %>
+                            <% if (todo.period && todo.period !== '') { %>
+                                <span class="period-badge"><%= todo.period %></span>
+                            <% } %>
+                        </div>
+                        <div class="todo-meta">
+                            📅 <%= new Date(todo.dueDate).toLocaleString('ja-JP', { dateStyle: 'medium', timeStyle: 'short' }) %>
+                        </div>
+                    </div>
+                    <!-- /todo/:id を使用した RESTful な削除（完了として扱う） -->
+                    <form action="/todo/<%= todo.id %>?_method=DELETE" method="POST" onsubmit="return confirm('完了しましたか？')">
+                        <button type="submit" class="complete-btn" title="完了">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </button>
+                    </form>
+                </li>
+            <% }) %>
+        </ul>
+
+        <div class="add-card" id="addCard">
+            <div class="add-card-header" onclick="toggleForm()">
+                <h2>New Task</h2>
+                <div class="toggle-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="add-card-body">
+                <!-- /todos を使用した RESTful な追加 -->
+                <form action="/todos" method="POST">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" required placeholder="何をする？">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="time">Time</label>
+                            <input type="time" id="time" name="time" required value="09:00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="period">Period</label>
+                        <select id="period" name="period">
+                            <option value="auto" selected>✨ 自動判定（時間から計算）</option>
+                            <option value="none">なし</option>
+                            <option value="朝">朝</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="昼">昼</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="放課後">放課後</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn">Add Todo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('date').valueAsDate = new Date();
+
+        function toggleForm() {
+            const card = document.getElementById('addCard');
+            card.classList.toggle('collapsed');
+            
+            // 状態を保存
+            const isCollapsed = card.classList.contains('collapsed');
+            localStorage.setItem('todo-form-collapsed', isCollapsed);
+        }
+
+        // 初期状態の復元
+        window.addEventListener('DOMContentLoaded', () => {
+            const isCollapsed = localStorage.getItem('todo-form-collapsed') === 'true';
+            if (isCollapsed) {
+                document.getElementById('addCard').classList.add('collapsed');
+            }
+        });
+    </script>
+</body>
+</html>
