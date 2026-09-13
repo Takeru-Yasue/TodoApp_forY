@@ -48,14 +48,8 @@ $ npm install
 2. **データベースとユーザーの作成**
    `psql` または GUIツール（pgAdminなど）で以下のSQLを実行します。
    ```sql
-   CREATE USER for_y_user WITH PASSWORD 'Takeru94y';
+   CREATE USER for_y_user WITH PASSWORD 'Pass1234';
    CREATE DATABASE for_y_db OWNER for_y_user;
-   ```
-
-3. **環境変数の設定**
-   `.env.example` をコピーして `.env` を作成します。
-   ```bash
-   cp .env.example .env
    ```
 
 アプリを起動すると、TypeORMによって自動的にデータベースにテーブルが作成されます。
