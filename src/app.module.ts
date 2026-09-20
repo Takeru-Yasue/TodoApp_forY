@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TodosModule } from './todos/todos.module';
 import { Todo } from './todos/entities/todo.entity';
+import { User } from './users/entities/user.entity';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,7 +14,7 @@ dotenv.config();
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      entities: [Todo],
+      entities: [Todo, User],
       synchronize: true, // 開発環境なのでテーブルを自動生成します
     }),
     TodosModule,
