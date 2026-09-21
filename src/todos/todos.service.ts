@@ -12,7 +12,7 @@ export class TodosService {
     private todoRepository: Repository<Todo>,
   ) {}
 
-  async create(createTodoDto: CreateTodoDto) {
+  async create(createTodoDto: CreateTodoDto, userId?: number) {
     try {
 
       let dueDate: Date;
@@ -39,6 +39,7 @@ export class TodosService {
         title: createTodoDto.title,
         dueDate: dueDate,
         period: finalPeriod,
+        userId: userId ?? undefined,
       });
 
       return await this.todoRepository.save(todo);
@@ -79,9 +80,10 @@ export class TodosService {
     }
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
     try {
       return await this.todoRepository.find({
+        where: userId !== undefined ? { userId } : undefined,
         order: {
           dueDate: 'ASC',
           period: 'ASC',
