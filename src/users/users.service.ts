@@ -60,4 +60,23 @@ export class UsersService {
   async findById(id: number): Promise<User | null> {
     return this.userRepository.findOne({ where: { id } });
   }
+
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<Omit<User, 'password'> | null> {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      return null;
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return null;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...result } = user;
+    return result as Omit<User, 'password'>;
+  }
 }
