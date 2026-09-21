@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TodosModule } from './todos/todos.module';
+import { UsersModule } from './users/users.module';
 import { Todo } from './todos/entities/todo.entity';
 import { User } from './users/entities/user.entity';
 import * as dotenv from 'dotenv';
@@ -18,6 +19,7 @@ dotenv.config();
       synchronize: true, // 開発環境なのでテーブルを自動生成します
     }),
     TodosModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
