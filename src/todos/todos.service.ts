@@ -114,7 +114,10 @@ export class TodosService {
     return this.findOne(id);
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId?: number) {
+    if (userId) {
+      return await this.todoRepository.delete({ id, userId });
+    }
     return await this.todoRepository.delete(id);
   }
 }

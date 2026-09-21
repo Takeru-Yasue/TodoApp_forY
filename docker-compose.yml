@@ -1,0 +1,31 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+ 
+  db:
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_USER: for_y_user
+      POSTGRES_PASSWORD: Pass1234
+      POSTGRES_DB: for_y_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U for_y_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+ 
+volumes:
+  pgdata:
+ 
