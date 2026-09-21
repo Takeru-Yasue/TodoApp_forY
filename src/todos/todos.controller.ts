@@ -1,9 +1,19 @@
-import { Controller, Get, Post, Body, Render, Res, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Render,
+  Res,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import * as express from 'express';
 import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
+import { AuthenticatedGuard } from '../users/guards/authenticated.guard';
 
 @Controller('todos')
 export class TodosController {
@@ -30,18 +40,14 @@ export class TodosController {
   }
 
   @Post()
+  @UseGuards(AuthenticatedGuard)
   async create(
     @Body() createTodoDto: CreateTodoDto,
     @Req() req: express.Request,
     @Res() res: express.Response,
   ) {
-    const rawUserId = req.signedCookies?.userId;
-    const userId = rawUserId ? parseInt(rawUserId, 10) : undefined;
-
-    await this.todosService.create(
-      createTodoDto,
-      userId && !isNaN(userId) ? userId : undefined,
-    );
+    const user = (req as any).user as User;
+    await this.todosService.create(createTodoDto, user.id);
     return res.redirect('/todos');
   }
 }
