@@ -6,11 +6,13 @@ import {
   Render,
   Res,
   HttpStatus,
+  UseFilters,
 } from '@nestjs/common';
 import * as express from 'express';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { RegisterValidationFilter } from './register-validation.filter';
 
 const AUTH_COOKIE_NAME = 'userId';
 const COOKIE_OPTIONS: express.CookieOptions = {
@@ -31,6 +33,7 @@ export class UsersController {
   }
 
   @Post('register')
+  @UseFilters(RegisterValidationFilter)
   async register(
     @Body() createUserDto: CreateUserDto,
     @Res() res: express.Response,
