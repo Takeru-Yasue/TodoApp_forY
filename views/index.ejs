@@ -370,7 +370,9 @@
                         <span style="font-size: 0.875rem; color: var(--text-muted);">
                             ようこそ、<strong><%= currentUser.username || currentUser.email.split('@')[0] %></strong> さん
                         </span>
+                        <a href="/departments" style="text-decoration: none; font-size: 0.875rem; color: var(--text-muted); font-weight: 600; padding: 0.4rem 0.8rem; border: 1px solid var(--border); border-radius: 8px; background: #fff; transition: all 0.15s ease;">🏢 部署</a>
                         <a href="/logout" style="text-decoration: none; font-size: 0.875rem; color: var(--danger); font-weight: 600; padding: 0.4rem 0.8rem; border: 1px solid var(--danger-border); border-radius: 8px; background: #fff; transition: all 0.15s ease;">ログアウト</a>
+
                     <% } else { %>
                         <a href="/login" style="text-decoration: none; font-size: 0.875rem; color: var(--primary); font-weight: 600; padding: 0.4rem 0.8rem; border: 1px solid var(--primary); border-radius: 8px; transition: all 0.15s ease;">ログイン</a>
                         <a href="/register" style="text-decoration: none; font-size: 0.875rem; color: #fff; background-color: var(--primary); font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 8px; transition: all 0.15s ease;">新規登録</a>

@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Department } from '../departments/entities/department.entity';
 
 @Injectable()
 export class UsersService {
@@ -61,6 +62,23 @@ export class UsersService {
     return this.userRepository.findOne({ where: { id } });
   }
 
+  async findByIdWithDepartments(id: number): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { id },
+      relations: ['departments'],
+    });
+  }
+
+  async setDepartments(userId: number, departments: Department[]): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['departments'],
+    });
+    if (!user) return;
+    user.departments = departments;
+    await this.userRepository.save(user);
+  }
+
   async validateUser(
     email: string,
     password: string,
@@ -80,3 +98,4 @@ export class UsersService {
     return result as Omit<User, 'password'>;
   }
 }
+

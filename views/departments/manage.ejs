@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= dept.name %> 管理 - やることリスト</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --danger-bg: #fff1f2;
+            --danger-border: #fecdd3;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+            --border: #e2e8f0;
+            --radius: 12px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 560px; margin: 0 auto; }
+        .page-header { margin-bottom: 1.75rem; }
+        .page-header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .page-header p { font-size: 0.875rem; color: var(--text-muted); }
+        .back-link { font-size: 0.875rem; color: var(--text-muted); text-decoration: none; display: inline-block; margin-bottom: 1rem; }
+        .back-link:hover { color: var(--primary); }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .alert-error { background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger); }
+        .alert-success { background: var(--success-bg); border: 1px solid var(--success-border); color: #15803d; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+        .card h2 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .current-master {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: #fef9c3;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            margin-bottom: 1.25rem;
+        }
+        .current-master-label { font-size: 0.8rem; color: #92400e; }
+        .current-master-name { font-weight: 700; font-size: 0.95rem; color: #78350f; }
+
+        label.section-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+        select {
+            width: 100%;
+            padding: 0.6rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            margin-bottom: 1rem;
+        }
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+        }
+        .help-text { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.875rem; }
+
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-warning { background: #fef9c3; color: #a16207; border: 1px solid #fde68a; }
+        .btn-warning:hover { background: #fef08a; }
+
+        .no-members { font-size: 0.875rem; color: var(--text-muted); font-style: italic; }
+
+        .not-master-notice {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/departments" class="back-link">← 部署一覧に戻る</a>
+
+    <div class="page-header">
+        <h1>🏢 <%= dept.name %></h1>
+        <% if (dept.description) { %>
+        <p><%= dept.description %></p>
+        <% } %>
+    </div>
+
+    <% if (error) { %>
+    <div class="alert alert-error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <%= error %>
+    </div>
+    <% } %>
+    <% if (success) { %>
+    <div class="alert alert-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <%= success %>
+    </div>
+    <% } %>
+
+    <% if (!isMaster) { %>
+    <div class="not-master-notice">
+        この部署の管理権限がありません。マスターユーザーのみが設定を変更できます。
+    </div>
+    <% } else { %>
+
+    <!-- 現在のマスター表示 -->
+    <div class="current-master">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <div>
+            <div class="current-master-label">現在のマスターユーザー</div>
+            <div class="current-master-name"><%= dept.master ? (dept.master.username || dept.master.email.split('@')[0]) : '未設定' %></div>
+        </div>
+    </div>
+
+    <!-- マスター移譲フォーム -->
+    <div class="card">
+        <h2>マスターユーザーを変更</h2>
+
+        <% if (members.length <= 1) { %>
+            <p class="no-members">
+                部署にメンバーが自分しかいないため、移譲できません。<br>
+                他のユーザーがプロフィールからこの部署に参加すると選択できるようになります。
+            </p>
+        <% } else { %>
+            <form action="/departments/<%= dept.id %>/master" method="POST" onsubmit="return confirm('マスターを変更すると、あなたの管理権限がなくなります。よろしいですか？')">
+                <label class="section-label" for="newMasterId">新しいマスターユーザーを選択</label>
+                <p class="help-text">この部署に所属しているメンバーから選択できます。</p>
+                <select name="newMasterId" id="newMasterId" required>
+                    <% members.forEach(member => { %>
+                        <% if (member.id !== currentUser.id) { %>
+                        <option value="<%= member.id %>">
+                            <%= member.username || member.email.split('@')[0] %> (<%= member.email %>)
+                        </option>
+                        <% } %>
+                    <% }) %>
+                </select>
+                <button type="submit" class="btn btn-warning">マスターを移譲する</button>
+            </form>
+        <% } %>
+    </div>
+
+    <% } %>
+</div>
+</body>
+</html>
