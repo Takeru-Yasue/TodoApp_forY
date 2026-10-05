@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部署一覧 - やることリスト</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --danger-bg: #fff1f2;
+            --danger-border: #fecdd3;
+            --success: #22c55e;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+            --border: #e2e8f0;
+            --radius: 12px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 720px; margin: 0 auto; }
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+        .back-link {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        .back-link:hover { color: var(--primary); }
+
+        /* アラート */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .alert-error { background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger); }
+        .alert-success { background: var(--success-bg); border: 1px solid var(--success-border); color: #15803d; }
+
+        /* 新規作成カード */
+        .create-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .create-card h2 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.875rem;
+        }
+        .form-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .form-row input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            padding: 0.6rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .form-row input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+        }
+        .btn { 
+            padding: 0.6rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+        .btn-danger:hover { background: #ffe0e3; }
+        .btn-ghost { background: #f1f5f9; color: var(--text-muted); }
+        .btn-ghost:hover { background: #e2e8f0; color: var(--text-main); }
+
+        /* 部署カード */
+        .dept-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .dept-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .dept-card.is-member {
+            border-color: var(--primary);
+            background: #f5f3ff;
+        }
+        .dept-info { flex: 1; min-width: 0; }
+        .dept-name { font-weight: 700; font-size: 1rem; }
+        .dept-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+        .dept-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            background: #eef2ff;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        .dept-badge.master { background: #fef9c3; color: #a16207; }
+        .dept-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h1>🏢 部署一覧</h1>
+        <a href="/todos" class="back-link">← Todo一覧に戻る</a>
+    </div>
+
+    <% if (error) { %>
+    <div class="alert alert-error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <%= error %>
+    </div>
+    <% } %>
+    <% if (success) { %>
+    <div class="alert alert-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <%= success %>
+    </div>
+    <% } %>
+
+    <!-- 新規部署作成 -->
+    <div class="create-card">
+        <h2>New Department</h2>
+        <form action="/departments" method="POST">
+            <div class="form-row">
+                <input type="text" name="name" placeholder="部署名 (例: 3年1組)" required maxlength="50">
+                <input type="text" name="description" placeholder="説明 (任意)" maxlength="100">
+                <button type="submit" class="btn btn-primary">作成</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 部署一覧 -->
+    <% if (departments.length === 0) { %>
+    <div class="empty-state">まだ部署がありません。最初の部署を作成しましょう。</div>
+    <% } else { %>
+    <div class="dept-list">
+        <% departments.forEach(dept => {
+            const isMaster = dept.masterId === currentUser.id;
+            const isMember = myDeptIds.includes(dept.id);
+        %>
+        <div class="dept-card <%= isMember ? 'is-member' : '' %>">
+            <div class="dept-info">
+                <div class="dept-name">
+                    <%= dept.name %>
+                    <% if (isMaster) { %><span class="dept-badge master">マスター</span><% } %>
+                    <% if (isMember) { %><span class="dept-badge">所属中</span><% } %>
+                </div>
+                <div class="dept-meta">
+                    <% if (dept.description) { %><%= dept.description %> · <% } %>
+                    管理者: <strong><%= dept.master ? (dept.master.username || dept.master.email.split('@')[0]) : '未設定' %></strong>
+                </div>
+            </div>
+            <div class="dept-actions">
+                <% if (isMember) { %>
+                    <form action="/departments/<%= dept.id %>/leave" method="POST">
+                        <button type="submit" class="btn btn-ghost" style="color: var(--danger);">脱退</button>
+                    </form>
+                <% } else { %>
+                    <form action="/departments/<%= dept.id %>/join" method="POST">
+                        <button type="submit" class="btn btn-primary">参加</button>
+                    </form>
+                <% } %>
+                <% if (isMaster) { %>
+                    <a href="/departments/<%= dept.id %>/manage" class="btn btn-ghost">管理</a>
+                    <form action="/departments/<%= dept.id %>/delete" method="POST" onsubmit="return confirm('「<%= dept.name %>」を削除しますか？\nメンバーの所属情報も削除されます。')">
+                        <button type="submit" class="btn btn-danger">削除</button>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+    <% } %>
+</div>
+</body>
+</html>

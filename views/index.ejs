@@ -367,10 +367,24 @@
                 <h1 style="margin: 0;">やることリスト</h1>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <% if (typeof currentUser !== 'undefined' && currentUser) { %>
-                        <span style="font-size: 0.875rem; color: var(--text-muted);">
-                            ようこそ、<strong><%= currentUser.username || currentUser.email.split('@')[0] %></strong> さん
-                        </span>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                            <span style="font-size: 0.875rem; color: var(--text-muted);">
+                                ようこそ、<strong><%= currentUser.username || currentUser.email.split('@')[0] %></strong> さん
+                            </span>
+                            <% if (currentUser.departments && currentUser.departments.length > 0) { %>
+                                <span style="font-size: 0.78rem; color: var(--primary); font-weight: 600;">
+                                    所属: <%= currentUser.departments.map(d => d.name).join(', ') %>
+                                </span>
+                            <% } else { %>
+                                <span style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">
+                                    所属: なし
+                                </span>
+                            <% } %>
+                        </div>
+                        <a href="/profile" style="text-decoration: none; font-size: 0.875rem; color: var(--text-muted); font-weight: 600; padding: 0.4rem 0.8rem; border: 1px solid var(--border); border-radius: 8px; background: #fff; transition: all 0.15s ease;">👤 プロフィール</a>
+                        <a href="/departments" style="text-decoration: none; font-size: 0.875rem; color: var(--text-muted); font-weight: 600; padding: 0.4rem 0.8rem; border: 1px solid var(--border); border-radius: 8px; background: #fff; transition: all 0.15s ease;">🏢 部署一覧</a>
                         <a href="/logout" style="text-decoration: none; font-size: 0.875rem; color: var(--danger); font-weight: 600; padding: 0.4rem 0.8rem; border: 1px solid var(--danger-border); border-radius: 8px; background: #fff; transition: all 0.15s ease;">ログアウト</a>
+
                     <% } else { %>
                         <a href="/login" style="text-decoration: none; font-size: 0.875rem; color: var(--primary); font-weight: 600; padding: 0.4rem 0.8rem; border: 1px solid var(--primary); border-radius: 8px; transition: all 0.15s ease;">ログイン</a>
                         <a href="/register" style="text-decoration: none; font-size: 0.875rem; color: #fff; background-color: var(--primary); font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 8px; transition: all 0.15s ease;">新規登録</a>
@@ -413,9 +427,15 @@
                             <% if (todo.period && todo.period !== '') { %>
                                 <span class="period-badge"><%= todo.period %></span>
                             <% } %>
+                            <% if (todo.department) { %>
+                                <span class="period-badge" style="background:#e0e7ff; color:#3730a3; font-weight:700;">🏢 <%= todo.department.name %></span>
+                            <% } %>
                         </div>
                         <div class="todo-meta">
                             📅 <%= new Date(todo.dueDate).toLocaleString('ja-JP', { dateStyle: 'medium', timeStyle: 'short' }) %>
+                            <% if (todo.user && (typeof currentUser === 'undefined' || !currentUser || todo.user.id !== currentUser.id)) { %>
+                                · 作成者: <strong><%= todo.user.username || todo.user.email.split('@')[0] %></strong>
+                            <% } %>
                         </div>
                     </div>
                     <!-- /todo/:id を使用した RESTful な削除（完了として扱う） -->
@@ -443,6 +463,17 @@
                             <label for="title">Title</label>
                             <input type="text" id="title" name="title" required placeholder="何をする？">
                         </div>
+                        <% if (currentUser.departments && currentUser.departments.length > 0) { %>
+                        <div class="form-group">
+                            <label for="departmentId">対象部署 (共有範囲)</label>
+                            <select id="departmentId" name="departmentId">
+                                <option value="">👤 自分のみ (個人タスク)</option>
+                                <% currentUser.departments.forEach(dept => { %>
+                                    <option value="<%= dept.id %>">🏢 <%= dept.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <% } %>
                         <div class="form-row">
                             <div class="form-group" style="flex: 2;">
                                 <label for="date">Date</label>
