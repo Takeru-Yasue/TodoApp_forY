@@ -393,7 +393,51 @@
             </div>
         </header>
         
-        <ul class="todo-list">
+        <!-- フィルターバー -->
+        <div class="filter-bar" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; align-items: center; background: #fff; padding: 0.6rem 0.875rem; border-radius: 12px; border: 1px solid var(--border);">
+            <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 0.25rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                絞り込み:
+            </span>
+
+            <!-- 部署フィルター -->
+            <select id="filterDepartment" onchange="applyFilters()" style="padding: 0.35rem 0.6rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; background: #f8fafc; outline: none; cursor: pointer;">
+                <option value="all">すべての部署・個人</option>
+                <option value="personal">👤 個人タスク</option>
+                <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.departments) { %>
+                    <% currentUser.departments.forEach(dept => { %>
+                        <option value="<%= dept.id %>">🏢 <%= dept.name %></option>
+                    <% }) %>
+                <% } %>
+            </select>
+
+            <!-- 状態フィルター -->
+            <select id="filterStatus" onchange="applyFilters()" style="padding: 0.35rem 0.6rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; background: #f8fafc; outline: none; cursor: pointer;">
+                <option value="all">すべての状態</option>
+                <option value="overdue">🚨 期限切れ</option>
+                <option value="approaching">⏰ 期限間近</option>
+                <option value="normal">✅ 通常</option>
+            </select>
+
+            <!-- 時限フィルター -->
+            <select id="filterPeriod" onchange="applyFilters()" style="padding: 0.35rem 0.6rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; background: #f8fafc; outline: none; cursor: pointer;">
+                <option value="all">すべての時限</option>
+                <option value="朝">朝</option>
+                <option value="1">1限</option>
+                <option value="2">2限</option>
+                <option value="3">3限</option>
+                <option value="4">4限</option>
+                <option value="昼">昼</option>
+                <option value="5">5限</option>
+                <option value="6">6限</option>
+                <option value="7">7限</option>
+                <option value="放課後">放課後</option>
+            </select>
+
+            <span id="filterCount" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-left: auto;"></span>
+        </div>
+
+        <ul class="todo-list" id="todoList">
             <% if (todos.length === 0) { %>
                 <div class="empty-state">
                     <% if (typeof currentUser !== 'undefined' && currentUser) { %>
@@ -412,10 +456,14 @@
                     const isApproaching = !isOverdue && dueDate < tomorrow;
                     
                     let statusClass = '';
-                    if (isOverdue) statusClass = 'overdue';
-                    else if (isApproaching) statusClass = 'approaching';
+                    let statusKey = 'normal';
+                    if (isOverdue) { statusClass = 'overdue'; statusKey = 'overdue'; }
+                    else if (isApproaching) { statusClass = 'approaching'; statusKey = 'approaching'; }
             %>
-                <li class="todo-item <%= statusClass %>">
+                <li class="todo-item <%= statusClass %>"
+                    data-department-id="<%= todo.departmentId ? todo.departmentId : 'personal' %>"
+                    data-status="<%= statusKey %>"
+                    data-period="<%= todo.period || '' %>">
                     <div class="todo-info">
                         <div class="todo-header">
                             <span class="todo-title"><%= todo.title %></span>
@@ -518,23 +566,59 @@
     </div>
 
     <script>
-        document.getElementById('date').valueAsDate = new Date();
+        const dateEl = document.getElementById('date');
+        if (dateEl) dateEl.valueAsDate = new Date();
 
         function toggleForm() {
             const card = document.getElementById('addCard');
+            if (!card) return;
             card.classList.toggle('collapsed');
-            
-            // 状態を保存
             const isCollapsed = card.classList.contains('collapsed');
             localStorage.setItem('todo-form-collapsed', isCollapsed);
+        }
+
+        function applyFilters() {
+            const deptVal = document.getElementById('filterDepartment')?.value || 'all';
+            const statusVal = document.getElementById('filterStatus')?.value || 'all';
+            const periodVal = document.getElementById('filterPeriod')?.value || 'all';
+
+            const items = document.querySelectorAll('.todo-item');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const itemDept = item.getAttribute('data-department-id');
+                const itemStatus = item.getAttribute('data-status');
+                const itemPeriod = item.getAttribute('data-period');
+
+                const matchDept = (deptVal === 'all') ||
+                                  (deptVal === 'personal' && itemDept === 'personal') ||
+                                  (deptVal === itemDept);
+
+                const matchStatus = (statusVal === 'all') || (itemStatus === statusVal);
+                const matchPeriod = (periodVal === 'all') || (itemPeriod === periodVal);
+
+                if (matchDept && matchStatus && matchPeriod) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const countEl = document.getElementById('filterCount');
+            if (countEl) {
+                countEl.textContent = `${visibleCount} / ${items.length} 件`;
+            }
         }
 
         // 初期状態の復元
         window.addEventListener('DOMContentLoaded', () => {
             const isCollapsed = localStorage.getItem('todo-form-collapsed') === 'true';
-            if (isCollapsed) {
-                document.getElementById('addCard').classList.add('collapsed');
+            const addCard = document.getElementById('addCard');
+            if (isCollapsed && addCard) {
+                addCard.classList.add('collapsed');
             }
+            applyFilters();
         });
     </script>
 </body>
