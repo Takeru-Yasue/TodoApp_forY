@@ -30,7 +30,7 @@ export class TodosController {
 
     let currentUser: User | null = null;
     if (userId && !isNaN(userId)) {
-      currentUser = await this.usersService.findById(userId);
+      currentUser = await this.usersService.findByIdWithDepartments(userId);
     }
 
     const todos = await this.todosService.findAll(

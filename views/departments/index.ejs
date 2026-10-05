@@ -196,7 +196,7 @@
                 <div class="dept-name">
                     <%= dept.name %>
                     <% if (isMaster) { %><span class="dept-badge master">マスター</span><% } %>
-                    <% if (isMember && !isMaster) { %><span class="dept-badge">所属中</span><% } %>
+                    <% if (isMember) { %><span class="dept-badge">所属中</span><% } %>
                 </div>
                 <div class="dept-meta">
                     <% if (dept.description) { %><%= dept.description %> · <% } %>
@@ -204,6 +204,15 @@
                 </div>
             </div>
             <div class="dept-actions">
+                <% if (isMember) { %>
+                    <form action="/departments/<%= dept.id %>/leave" method="POST">
+                        <button type="submit" class="btn btn-ghost" style="color: var(--danger);">脱退</button>
+                    </form>
+                <% } else { %>
+                    <form action="/departments/<%= dept.id %>/join" method="POST">
+                        <button type="submit" class="btn btn-primary">参加</button>
+                    </form>
+                <% } %>
                 <% if (isMaster) { %>
                     <a href="/departments/<%= dept.id %>/manage" class="btn btn-ghost">管理</a>
                     <form action="/departments/<%= dept.id %>/delete" method="POST" onsubmit="return confirm('「<%= dept.name %>」を削除しますか？\nメンバーの所属情報も削除されます。')">

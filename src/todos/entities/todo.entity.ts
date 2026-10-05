@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Department } from '../../departments/entities/department.entity';
 
 @Entity()
 export class Todo {
@@ -32,6 +33,16 @@ export class Todo {
   })
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @Column({ nullable: true })
+  departmentId: number | null;
+
+  @ManyToOne(() => Department, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'departmentId' })
+  department: Department | null;
 
   @CreateDateColumn()
   createdAt: Date;

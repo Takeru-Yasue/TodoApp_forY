@@ -8,12 +8,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Department } from './entities/department.entity';
 import { CreateDepartmentDto } from './dto/create-department.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class DepartmentsService {
   constructor(
     @InjectRepository(Department)
     private readonly departmentRepository: Repository<Department>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   /** 全部署一覧（master ユーザー情報付き） */
@@ -52,7 +55,7 @@ export class DepartmentsService {
     return this.departmentRepository.find({ where: { id: In(ids) } });
   }
 
-  /** 部署を作成し、作成者をマスターに設定する */
+  /** 部署を作成し、作成者をマスターに設定すると同時に所属メンバーに追加する */
   async create(dto: CreateDepartmentDto, masterId: number): Promise<Department> {
     const existing = await this.departmentRepository.findOne({
       where: { name: dto.name },
@@ -61,7 +64,22 @@ export class DepartmentsService {
       throw new ConflictException('同名の部署が既に存在します');
     }
     const dept = this.departmentRepository.create({ ...dto, masterId });
-    return this.departmentRepository.save(dept);
+    const savedDept = await this.departmentRepository.save(dept);
+
+    // 作成者を自動的に部署の所属メンバーに追加する
+    const user = await this.userRepository.findOne({
+      where: { id: masterId },
+      relations: ['departments'],
+    });
+    if (user) {
+      if (!user.departments) user.departments = [];
+      if (!user.departments.some((d) => d.id === savedDept.id)) {
+        user.departments.push(savedDept);
+        await this.userRepository.save(user);
+      }
+    }
+
+    return savedDept;
   }
 
   /** 部署名・説明を更新（マスターのみ） */
@@ -94,8 +112,26 @@ export class DepartmentsService {
     if (dept.masterId !== requesterId) {
       throw new ForbiddenException('この操作はマスターユーザーのみ行えます');
     }
+
+    const newMaster = await this.userRepository.findOne({
+      where: { id: newMasterId },
+      relations: ['departments'],
+    });
+    if (!newMaster) {
+      throw new NotFoundException('指定されたユーザーが存在しません');
+    }
+
     dept.masterId = newMasterId;
-    return this.departmentRepository.save(dept);
+    const savedDept = await this.departmentRepository.save(dept);
+
+    // 新マスターを自動的に所属メンバーに追加
+    if (!newMaster.departments) newMaster.departments = [];
+    if (!newMaster.departments.some((d) => d.id === savedDept.id)) {
+      newMaster.departments.push(savedDept);
+      await this.userRepository.save(newMaster);
+    }
+
+    return savedDept;
   }
 
   /** 部署を削除（マスターのみ） */

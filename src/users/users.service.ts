@@ -58,6 +58,12 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email } });
   }
 
+  async findAll(): Promise<User[]> {
+    return this.userRepository.find({
+      order: { username: 'ASC', email: 'ASC' },
+    });
+  }
+
   async findById(id: number): Promise<User | null> {
     return this.userRepository.findOne({ where: { id } });
   }

@@ -1,20 +1,22 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { Todo } from './entities/todo.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class TodosService {
   constructor(
     @InjectRepository(Todo)
     private todoRepository: Repository<Todo>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(createTodoDto: CreateTodoDto, userId?: number) {
     try {
-
       let dueDate: Date;
       if (createTodoDto['date'] && createTodoDto['time']) {
         dueDate = new Date(`${createTodoDto['date']} ${createTodoDto['time']}`);
@@ -35,11 +37,16 @@ export class TodosService {
         finalPeriod = createTodoDto.period || ''; // 元の文字列（漢字など）を維持
       }
 
+      const deptId = createTodoDto.departmentId
+        ? Number(createTodoDto.departmentId)
+        : null;
+
       const todo = this.todoRepository.create({
         title: createTodoDto.title,
         dueDate: dueDate,
         period: finalPeriod,
         userId: userId ?? undefined,
+        departmentId: deptId && !isNaN(deptId) ? deptId : null,
       });
 
       return await this.todoRepository.save(todo);
@@ -82,8 +89,30 @@ export class TodosService {
 
   async findAll(userId?: number) {
     try {
+      let whereConditions: any = undefined;
+
+      if (userId !== undefined) {
+        const user = await this.userRepository.findOne({
+          where: { id: userId },
+          relations: ['departments'],
+        });
+
+        const deptIds = (user?.departments ?? []).map((d) => d.id);
+
+        if (deptIds.length > 0) {
+          // 自分の個人のTodo OR 自分が所属する部署のTodo
+          whereConditions = [
+            { userId },
+            { departmentId: In(deptIds) },
+          ];
+        } else {
+          whereConditions = { userId };
+        }
+      }
+
       return await this.todoRepository.find({
-        where: userId !== undefined ? { userId } : undefined,
+        where: whereConditions,
+        relations: ['user', 'department'],
         order: {
           dueDate: 'ASC',
           period: 'ASC',
@@ -100,6 +129,7 @@ export class TodosService {
   async findOne(id: number) {
     return await this.todoRepository.findOne({
       where: { id },
+      relations: ['user', 'department'],
     });
   }
 
@@ -116,7 +146,24 @@ export class TodosService {
 
   async remove(id: number, userId?: number) {
     if (userId) {
-      return await this.todoRepository.delete({ id, userId });
+      const todo = await this.todoRepository.findOne({ where: { id } });
+      if (!todo) return;
+
+      if (todo.userId === userId) {
+        return await this.todoRepository.delete(id);
+      }
+
+      if (todo.departmentId) {
+        const user = await this.userRepository.findOne({
+          where: { id: userId },
+          relations: ['departments'],
+        });
+        const userDeptIds = (user?.departments ?? []).map((d) => d.id);
+        if (userDeptIds.includes(todo.departmentId)) {
+          return await this.todoRepository.delete(id);
+        }
+      }
+      return;
     }
     return await this.todoRepository.delete(id);
   }

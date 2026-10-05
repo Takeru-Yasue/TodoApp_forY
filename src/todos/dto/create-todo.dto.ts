@@ -20,4 +20,7 @@ export class CreateTodoDto {
   @IsString()
   @IsOptional()
   time?: string;
+
+  @IsOptional()
+  departmentId?: number;
 }

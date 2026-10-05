@@ -96,17 +96,53 @@ export class DepartmentsController {
   ) {
     const currentUser = (req as any).user as User;
     const dept = await this.departmentsService.findOne(id);
-    // 部署のメンバー一覧を取得（マスター候補として表示）
-    const userWithDepts = await this.usersService.findByIdWithDepartments(currentUser.id);
-    const deptWithMembers = await this.departmentsService.findOneWithMembers(id);
+    const allUsers = await this.usersService.findAll();
+    const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
+
     return {
       dept,
       currentUser,
-      members: deptWithMembers.users ?? [],
+      candidateUsers,
       isMaster: dept.masterId === currentUser.id,
       error: null,
       success: null,
     };
+  }
+
+  /** 部署に参加する */
+  @Post(':id/join')
+  async join(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: express.Request,
+    @Res() res: express.Response,
+  ) {
+    const currentUser = (req as any).user as User;
+    const dept = await this.departmentsService.findOne(id);
+    const userWithDepts = await this.usersService.findByIdWithDepartments(currentUser.id);
+    if (userWithDepts) {
+      const depts = userWithDepts.departments ?? [];
+      if (!depts.some((d) => d.id === dept.id)) {
+        depts.push(dept);
+        await this.usersService.setDepartments(currentUser.id, depts);
+      }
+    }
+    return res.redirect('/departments');
+  }
+
+  /** 部署から脱退する */
+  @Post(':id/leave')
+  async leave(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: express.Request,
+    @Res() res: express.Response,
+  ) {
+    const currentUser = (req as any).user as User;
+    const userWithDepts = await this.usersService.findByIdWithDepartments(currentUser.id);
+    if (userWithDepts) {
+      const depts = (userWithDepts.departments ?? []).filter((d) => d.id !== id);
+      await this.usersService.setDepartments(currentUser.id, depts);
+    }
+    return res.redirect('/departments');
   }
 
   /** マスターユーザーを変更（マスターのみ） */
@@ -119,25 +155,20 @@ export class DepartmentsController {
   ) {
     const currentUser = (req as any).user as User;
     const newMasterId = parseInt(newMasterIdStr, 10);
+    if (isNaN(newMasterId)) {
+      return res.redirect(`/departments/${id}/manage`);
+    }
     try {
       await this.departmentsService.updateMaster(id, newMasterId, currentUser.id);
-      const dept = await this.departmentsService.findOne(id);
-      const deptWithMembers = await this.departmentsService.findOneWithMembers(id);
-      return res.render('departments/manage', {
-        dept,
-        currentUser,
-        members: deptWithMembers.users ?? [],
-        isMaster: dept.masterId === currentUser.id,
-        error: null,
-        success: 'マスターユーザーを変更しました。',
-      });
+      return res.redirect('/departments');
     } catch (error: any) {
       const dept = await this.departmentsService.findOne(id);
-      const deptWithMembers = await this.departmentsService.findOneWithMembers(id);
+      const allUsers = await this.usersService.findAll();
+      const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
       return res.status(HttpStatus.FORBIDDEN).render('departments/manage', {
         dept,
         currentUser,
-        members: deptWithMembers.users ?? [],
+        candidateUsers,
         isMaster: dept.masterId === currentUser.id,
         error: error?.response?.message || '変更に失敗しました',
         success: null,

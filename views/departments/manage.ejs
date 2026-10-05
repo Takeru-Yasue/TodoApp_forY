@@ -171,22 +171,19 @@
     <div class="card">
         <h2>マスターユーザーを変更</h2>
 
-        <% if (members.length <= 1) { %>
+        <% if (candidateUsers.length === 0) { %>
             <p class="no-members">
-                部署にメンバーが自分しかいないため、移譲できません。<br>
-                他のユーザーがプロフィールからこの部署に参加すると選択できるようになります。
+                移譲できる他のユーザーがまだ登録されていません。
             </p>
         <% } else { %>
-            <form action="/departments/<%= dept.id %>/master" method="POST" onsubmit="return confirm('マスターを変更すると、あなたの管理権限がなくなります。よろしいですか？')">
+            <form action="/departments/<%= dept.id %>/master" method="POST" onsubmit="return confirm('マスターを変更すると、あなたの管理権限が新しいユーザーに移譲されます。よろしいですか？')">
                 <label class="section-label" for="newMasterId">新しいマスターユーザーを選択</label>
-                <p class="help-text">この部署に所属しているメンバーから選択できます。</p>
+                <p class="help-text">登録済みの全ユーザーから新しい管理者を選択できます（自動的に所属メンバーにも追加されます）。</p>
                 <select name="newMasterId" id="newMasterId" required>
-                    <% members.forEach(member => { %>
-                        <% if (member.id !== currentUser.id) { %>
-                        <option value="<%= member.id %>">
-                            <%= member.username || member.email.split('@')[0] %> (<%= member.email %>)
+                    <% candidateUsers.forEach(user => { %>
+                        <option value="<%= user.id %>">
+                            <%= user.username || user.email.split('@')[0] %> (<%= user.email %>)
                         </option>
-                        <% } %>
                     <% }) %>
                 </select>
                 <button type="submit" class="btn btn-warning">マスターを移譲する</button>
