@@ -167,6 +167,29 @@
         </div>
     </div>
 
+    <!-- 所属メンバー設定フォーム -->
+    <div class="card">
+        <h2>所属メンバーの設定</h2>
+        <form action="/departments/<%= dept.id %>/members" method="POST">
+            <label class="section-label">この部署に所属させるユーザーを選択</label>
+            <p class="help-text">チェックを入れたユーザーが「<%= dept.name %>」のメンバーになります。</p>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <% allUsers.forEach(user => { 
+                    const isChecked = memberIds.includes(user.id);
+                %>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: #f8fafc;">
+                        <input type="checkbox" name="memberUserIds" value="<%= user.id %>" <%= isChecked ? 'checked' : '' %> style="width: auto; margin: 0;">
+                        <span>
+                            <strong><%= user.username || user.email.split('@')[0] %></strong>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">(<%= user.email %>)</span>
+                        </span>
+                    </label>
+                <% }) %>
+            </div>
+            <button type="submit" class="btn btn-primary">メンバー設定を保存</button>
+        </form>
+    </div>
+
     <!-- マスター移譲フォーム -->
     <div class="card">
         <h2>マスターユーザーを変更</h2>

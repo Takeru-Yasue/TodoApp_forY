@@ -62,7 +62,7 @@ export class DepartmentsController {
     }
   }
 
-  /** 部署を削除（マスターのみ） */
+  /** 部署を削除（マスターまたは管理者のみ） */
   @Post(':id/delete')
   async remove(
     @Param('id', ParseIntPipe) id: number,
@@ -71,7 +71,7 @@ export class DepartmentsController {
   ) {
     const currentUser = (req as any).user as User;
     try {
-      await this.departmentsService.remove(id, currentUser.id);
+      await this.departmentsService.remove(id, currentUser);
       return res.redirect('/departments');
     } catch (error: any) {
       const departments = await this.departmentsService.findAll();
@@ -87,7 +87,7 @@ export class DepartmentsController {
     }
   }
 
-  /** 部署の管理ページ（マスター変更・名前変更） */
+  /** 部署の管理ページ（メンバー設定・マスター変更・名前変更） */
   @Get(':id/manage')
   @Render('departments/manage')
   async showManagePage(
@@ -95,15 +95,21 @@ export class DepartmentsController {
     @Req() req: express.Request,
   ) {
     const currentUser = (req as any).user as User;
-    const dept = await this.departmentsService.findOne(id);
+    const dept = await this.departmentsService.findOneWithMembers(id);
     const allUsers = await this.usersService.findAll();
     const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
+    const memberIds = (dept.users || []).map((u) => u.id);
+    const isAdmin = currentUser.email === 'admin@ad.com';
+    const isMaster = dept.masterId === currentUser.id || isAdmin;
 
     return {
       dept,
       currentUser,
+      allUsers,
       candidateUsers,
-      isMaster: dept.masterId === currentUser.id,
+      memberIds,
+      isMaster,
+      isAdmin,
       error: null,
       success: null,
     };
@@ -145,7 +151,64 @@ export class DepartmentsController {
     return res.redirect('/departments');
   }
 
-  /** マスターユーザーを変更（マスターのみ） */
+  /** 部署の所属メンバーを一括更新（マスターまたは管理者のみ） */
+  @Post(':id/members')
+  async updateMembers(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: express.Request,
+    @Res() res: express.Response,
+  ) {
+    const currentUser = (req as any).user as User;
+    const rawUserIds = (req.body as any).memberUserIds;
+    const memberUserIds: number[] = rawUserIds
+      ? (Array.isArray(rawUserIds) ? rawUserIds : [rawUserIds])
+          .map(Number)
+          .filter((n: number) => !isNaN(n))
+      : [];
+
+    try {
+      await this.departmentsService.updateMembers(id, memberUserIds, currentUser);
+      const dept = await this.departmentsService.findOneWithMembers(id);
+      const allUsers = await this.usersService.findAll();
+      const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
+      const memberIds = (dept.users || []).map((u) => u.id);
+      const isAdmin = currentUser.email === 'admin@ad.com';
+      const isMaster = dept.masterId === currentUser.id || isAdmin;
+
+      return res.render('departments/manage', {
+        dept,
+        currentUser,
+        allUsers,
+        candidateUsers,
+        memberIds,
+        isMaster,
+        isAdmin,
+        error: null,
+        success: '所属メンバーを更新しました。',
+      });
+    } catch (error: any) {
+      const dept = await this.departmentsService.findOneWithMembers(id);
+      const allUsers = await this.usersService.findAll();
+      const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
+      const memberIds = (dept.users || []).map((u) => u.id);
+      const isAdmin = currentUser.email === 'admin@ad.com';
+      const isMaster = dept.masterId === currentUser.id || isAdmin;
+
+      return res.status(HttpStatus.FORBIDDEN).render('departments/manage', {
+        dept,
+        currentUser,
+        allUsers,
+        candidateUsers,
+        memberIds,
+        isMaster,
+        isAdmin,
+        error: error?.response?.message || 'メンバー更新に失敗しました',
+        success: null,
+      });
+    }
+  }
+
+  /** マスターユーザーを変更（マスターまたは管理者のみ） */
   @Post(':id/master')
   async updateMaster(
     @Param('id', ParseIntPipe) id: number,
@@ -159,17 +222,23 @@ export class DepartmentsController {
       return res.redirect(`/departments/${id}/manage`);
     }
     try {
-      await this.departmentsService.updateMaster(id, newMasterId, currentUser.id);
+      await this.departmentsService.updateMaster(id, newMasterId, currentUser);
       return res.redirect('/departments');
     } catch (error: any) {
-      const dept = await this.departmentsService.findOne(id);
+      const dept = await this.departmentsService.findOneWithMembers(id);
       const allUsers = await this.usersService.findAll();
       const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
+      const memberIds = (dept.users || []).map((u) => u.id);
+      const isAdmin = currentUser.email === 'admin@ad.com';
+      const isMaster = dept.masterId === currentUser.id || isAdmin;
       return res.status(HttpStatus.FORBIDDEN).render('departments/manage', {
         dept,
         currentUser,
+        allUsers,
         candidateUsers,
-        isMaster: dept.masterId === currentUser.id,
+        memberIds,
+        isMaster,
+        isAdmin,
         error: error?.response?.message || '変更に失敗しました',
         success: null,
       });
