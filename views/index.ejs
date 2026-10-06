@@ -615,15 +615,79 @@
                             <% } %>
                         </div>
                     </div>
-                    <!-- /todo/:id を使用した RESTful な削除（完了として扱う） -->
-                    <form action="/todo/<%= todo.id %>?_method=DELETE" method="POST" onsubmit="return confirm('完了しましたか？')">
-                        <button type="submit" class="complete-btn" title="完了">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <!-- /todo/:id を使用した RESTful な編集・削除 -->
+                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                        <button type="button" class="complete-btn" title="編集" style="color: #6366f1;" onclick="openEditModal(<%= todo.id %>, '<%= todo.title.replace(/'/g, "\\'") %>', '<%= new Date(todo.dueDate).toISOString().split('T')[0] %>', '<%= new Date(todo.dueDate).toTimeString().slice(0,5) %>', '<%= todo.period || '' %>', '<%= todo.departmentId || '' %>')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                         </button>
-                    </form>
+                        <form action="/todo/<%= todo.id %>?_method=DELETE" method="POST" onsubmit="return confirm('完了しましたか？')">
+                            <button type="submit" class="complete-btn" title="完了">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </button>
+                        </form>
+                    </div>
                 </li>
             <% }) %>
         </ul>
+
+        <!-- Todo 編集モーダル -->
+        <div class="filter-drawer-backdrop" id="editModalBackdrop" onclick="closeEditModal()"></div>
+        <div class="add-card" id="editModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 90%; max-width: 500px; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <div class="add-card-header" style="cursor: default;">
+                <h2>Todoの編集</h2>
+                <button type="button" class="close-drawer-btn" onclick="closeEditModal()">✕</button>
+            </div>
+            <div class="add-card-body" style="padding-top: 1rem;">
+                <form id="editForm" method="POST">
+                    <div class="form-group">
+                        <label for="editTitle">Title</label>
+                        <input type="text" id="editTitle" name="title" required>
+                    </div>
+                    <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.departments && currentUser.departments.length > 0) { %>
+                    <div class="form-group">
+                        <label for="editDepartmentId">対象部署 (共有範囲)</label>
+                        <select id="editDepartmentId" name="departmentId">
+                            <option value="">👤 自分のみ (個人タスク)</option>
+                            <% currentUser.departments.forEach(dept => { %>
+                                <option value="<%= dept.id %>">🏢 <%= dept.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <% } %>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="editDate">Date</label>
+                            <input type="date" id="editDate" name="date" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="editTime">Time</label>
+                            <input type="time" id="editTime" name="time" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPeriod">Period</label>
+                        <select id="editPeriod" name="period">
+                            <option value="auto">✨ 自動判定（時間から計算）</option>
+                            <option value="none">なし</option>
+                            <option value="朝">朝</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="昼">昼</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="放課後">放課後</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button type="button" onclick="closeEditModal()" style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); background: #f1f5f9; color: var(--text-muted); border-radius: 8px; font-weight: 600; cursor: pointer;">キャンセル</button>
+                        <button type="submit" class="submit-btn" style="flex: 1; margin-top: 0;">保存する</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <div class="add-card" id="addCard">
             <div class="add-card-header" onclick="toggleForm()">
@@ -774,9 +838,40 @@
             if (filterBtn) filterBtn.classList.toggle('active', isFiltered);
         }
 
-        // キーボードEscキーでドロワー閉じる
+        function openEditModal(id, title, date, time, period, departmentId) {
+            const modal = document.getElementById('editModal');
+            const backdrop = document.getElementById('editModalBackdrop');
+            const form = document.getElementById('editForm');
+            if (!modal || !backdrop || !form) return;
+
+            form.action = `/todo/${id}`;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editDate').value = date;
+            document.getElementById('editTime').value = time;
+            
+            const deptEl = document.getElementById('editDepartmentId');
+            if (deptEl) deptEl.value = departmentId || '';
+
+            const periodEl = document.getElementById('editPeriod');
+            if (periodEl) periodEl.value = period || 'none';
+
+            modal.style.display = 'block';
+            backdrop.classList.add('open');
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            const backdrop = document.getElementById('editModalBackdrop');
+            if (modal) modal.style.display = 'none';
+            if (backdrop) backdrop.classList.remove('open');
+        }
+
+        // キーボードEscキーでドロワー/モーダル閉じる
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeFilterDrawer();
+            if (e.key === 'Escape') {
+                closeFilterDrawer();
+                closeEditModal();
+            }
         });
 
         // 初期状態の復元
