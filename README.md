@@ -21,49 +21,70 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## 特徴・強み
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- 🏫 **学校の教員向け時間割に連動したTodo入力**
+  - タスクの締め切り時間から時限（「朝」「1〜7限」「昼」「放課後」）を自動判定・割り当て
+  - 時間割ごとのタスク整理・絞り込み表示に対応
+- 🏢 **教科・学年・校務分掌などの部署共有**
+  - 個人タスクだけでなく、所属部署・学年主任・分掌内でのタスク共有
+  - 部署ごとのタスクフィルタリング機能
+
+## 主な機能
+
+- **ユーザー認証・アカウント管理**
+  - ユーザー新規登録 / ログイン / ログアウト（Cookie認証）
+  - プロフィール編集（所属部署の選択・更新）
+- **Todo (タスク) 管理**
+  - 時間割（時限: 朝 / 1〜7限 / 昼 / 放課後）に基づくTodo入力・自動時限判定
+  - Todoの作成・一覧表示・削除
+  - ステータス（期限切れ / 期限間近 / 通常）や部署別のスライドドロワー絞り込み検索
+- **部署（分掌・学年等）管理**
+  - 複数部署の登録・所属管理
 
 ## 実行環境の準備
 
-このプロジェクトをローカルPCで動かすには、以下の環境が必要です。
+このプロジェクトを動かすには、以下の環境が必要です。
 
-- **Node.js**: v22 以上
-- **PostgreSQL**: 16 以上
+- **Docker** / **Docker Desktop**
 
-## Project setup
+## 起動手順 (Docker)
+
+Docker Compose を使用して、PostgreSQL データベースと NestJS アプリケーションを一括で起動できます。
 
 ```bash
+# 1. コンテナのビルドおよび起動
+$ docker compose up -d --build
+
+# 2. ログの確認
+$ docker compose logs -f
+
+# 3. コンテナの停止
+$ docker compose down
+```
+
+### ローカル（ホスト）でアプリを起動する場合
+
+PostgreSQL のみ Docker で起動し、NestJS アプリをローカルの Node.js で動かすことも可能です。
+
+```bash
+# PostgreSQL のみ起動
+$ docker compose up -d db
+
+# パッケージのインストール
 $ npm install
-```
 
-## Database setup (PostgreSQL)
-
-他のPCで動かす際は、以下の手順でPostgreSQLを準備してください。
-
-1. **PostgreSQLのインストール**
-   PCにPostgreSQLをインストールし、サービスを開始してください。
-
-2. **データベースとユーザーの作成**
-   `psql` または GUIツール（pgAdminなど）で以下のSQLを実行します。
-   ```sql
-   CREATE USER for_y_user WITH PASSWORD 'Pass1234';
-   CREATE DATABASE for_y_db OWNER for_y_user;
-   ```
-
-アプリを起動すると、TypeORMによって自動的にデータベースにテーブルが作成されます。
-
-## Compile and run the project
-
-```bash
-# 開発モード（自動リロードあり）
+# 開発モード起動
 $ npm run start:dev
-
-# 本番ビルド・実行
-$ npm run build
-$ npm run start:prod
 ```
+
+## 初期管理者アカウント
+
+アプリ起動時に以下の初期管理者ユーザーが自動的に作成されます。
+
+- **ユーザー名**: `administrator`
+- **メールアドレス**: `admin@ad.com`
+- **パスワード**: `admin1904`
 
 
 ## Run tests

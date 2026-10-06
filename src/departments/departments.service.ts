@@ -102,15 +102,36 @@ export class DepartmentsService {
     return this.departmentRepository.save(dept);
   }
 
-  /** マスターユーザーを変更（現マスターのみ） */
+  /** 部署の所属メンバーを全設定（マスターまたは管理者のみ） */
+  async updateMembers(
+    id: number,
+    memberUserIds: number[],
+    requester: User,
+  ): Promise<Department> {
+    const dept = await this.findOneWithMembers(id);
+    const isAdmin = requester.email === 'admin@ad.com';
+    if (!isAdmin && dept.masterId !== requester.id) {
+      throw new ForbiddenException('この操作はマスターユーザーまたは管理者のみ行えます');
+    }
+
+    const members = await this.userRepository.find({
+      where: { id: In(memberUserIds) },
+    });
+
+    dept.users = members;
+    return this.departmentRepository.save(dept);
+  }
+
+  /** マスターユーザーを変更（現マスターまたは管理者のみ） */
   async updateMaster(
     id: number,
     newMasterId: number,
-    requesterId: number,
+    requester: User,
   ): Promise<Department> {
     const dept = await this.findOne(id);
-    if (dept.masterId !== requesterId) {
-      throw new ForbiddenException('この操作はマスターユーザーのみ行えます');
+    const isAdmin = requester.email === 'admin@ad.com';
+    if (!isAdmin && dept.masterId !== requester.id) {
+      throw new ForbiddenException('この操作はマスターユーザーまたは管理者のみ行えます');
     }
 
     const newMaster = await this.userRepository.findOne({
@@ -134,11 +155,12 @@ export class DepartmentsService {
     return savedDept;
   }
 
-  /** 部署を削除（マスターのみ） */
-  async remove(id: number, requesterId: number): Promise<void> {
+  /** 部署を削除（マスターまたは管理者のみ） */
+  async remove(id: number, requester: User): Promise<void> {
     const dept = await this.findOne(id);
-    if (dept.masterId !== requesterId) {
-      throw new ForbiddenException('この操作はマスターユーザーのみ行えます');
+    const isAdmin = requester.email === 'admin@ad.com';
+    if (!isAdmin && dept.masterId !== requester.id) {
+      throw new ForbiddenException('この操作はマスターユーザーまたは管理者のみ行えます');
     }
     await this.departmentRepository.delete(id);
   }

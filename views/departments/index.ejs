@@ -188,14 +188,16 @@
     <% } else { %>
     <div class="dept-list">
         <% departments.forEach(dept => {
-            const isMaster = dept.masterId === currentUser.id;
+            const isAdmin = currentUser.email === 'admin@ad.com';
+            const isMaster = dept.masterId === currentUser.id || isAdmin;
             const isMember = myDeptIds.includes(dept.id);
         %>
         <div class="dept-card <%= isMember ? 'is-member' : '' %>">
             <div class="dept-info">
                 <div class="dept-name">
                     <%= dept.name %>
-                    <% if (isMaster) { %><span class="dept-badge master">マスター</span><% } %>
+                    <% if (dept.masterId === currentUser.id) { %><span class="dept-badge master">マスター</span><% } %>
+                    <% if (isAdmin) { %><span class="dept-badge master" style="background:#fee2e2; color:#dc2626;">管理者</span><% } %>
                     <% if (isMember) { %><span class="dept-badge">所属中</span><% } %>
                 </div>
                 <div class="dept-meta">
