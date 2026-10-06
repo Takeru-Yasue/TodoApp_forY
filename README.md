@@ -21,8 +21,10 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## 特徴・強み
+## 概要
+- 個人・部署のタスクを整理するためのTodoアプリです
 
+## 特徴・強み
 - 🏫 **学校の教員向け時間割に連動したTodo入力**
   - タスクの締め切り時間から時限（「朝」「1〜7限」「昼」「放課後」）を自動判定・割り当て
   - 時間割ごとのタスク整理・絞り込み表示に対応
@@ -31,7 +33,6 @@
   - 部署ごとのタスクフィルタリング機能
 
 ## 主な機能
-
 - **ユーザー認証・アカウント管理**
   - ユーザー新規登録 / ログイン / ログアウト（Cookie認証）
   - プロフィール編集（所属部署の選択・更新）
@@ -42,42 +43,86 @@
 - **部署（分掌・学年等）管理**
   - 複数部署の登録・所属管理
 
-## 実行環境の準備
+## 使用技術
 
-このプロジェクトを動かすには、以下の環境が必要です。
+### バックエンド
+| 分類 | 技術 |
+| --- | --- |
+| 言語 | TypeScript 5 |
+| ランタイム | Node.js(22系) |
+| フレームワーク | NestJS 11(Express) |
+| ORM | TypeORM 0.3 |
+| データベース | PostgreSQL |
 
-- **Docker** / **Docker Desktop**
+### フロントエンド
+| 分類 | 技術 |
+| --- | --- |
+| テンプレートエンジン | EJS(サーバーサイドレンダリング) |
 
-## 起動手順 (Docker)
+### 開発ツール
+| 分類 | 技術 |
+| --- | --- |
+| テスト | Jest, ts-jest, Supertest(E2E) |
+| 静的解析 | ESLint, typescript-eslint |
+| フォーマッタ | Prettier |
+| ビルド | NestJS CLI, ts-loader |
 
-Docker Compose を使用して、PostgreSQL データベースと NestJS アプリケーションを一括で起動できます。
+## 実行
 
-```bash
-# 1. コンテナのビルドおよび起動
-$ docker compose up -d --build
+**初めに以下を実行してください**
+  ```bash
+  $ npm install
+  ```
 
-# 2. ログの確認
-$ docker compose logs -f
+### Dockerを使う場合
+Dockerをインストールし、起動してください
 
-# 3. コンテナの停止
-$ docker compose down
-```
+1. **.envの作成　以下の内容を記術**
+  ```
+  DATABASE_URL="postgresql://for_y_user:Pass1234@db:5432/for_y_db?schema=public"
+  DB_USER=for_y_user
+  DB_PASSWORD=Pass1234
+  DB_NAME=for_y_db
+  ```
 
-### ローカル（ホスト）でアプリを起動する場合
+2. **コンテナのビルドおよび起動**
+  ```bash
+  $ docker compose up -d --build
+  ```
 
-PostgreSQL のみ Docker で起動し、NestJS アプリをローカルの Node.js で動かすことも可能です。
+3. **コンテナの停止**
+  ```bash
+  $ docker compose down
+  ```
+### Dockerを使わない場合
 
-```bash
-# PostgreSQL のみ起動
-$ docker compose up -d db
+1. **PostgreSQLのインストール**
+  PCにPostgreSQLをインストールし、サービスを開始してください
 
-# パッケージのインストール
-$ npm install
+2. **データベースとユーザーの作成**
+  `psql` または GUIツール（pgAdminなど）で以下のSQLを実行
+  ```sql
+  CREATE USER for_y_user WITH PASSWORD 'Pass1234';
+  CREATE DATABASE for_y_db OWNER for_y_user;
+  ```
 
-# 開発モード起動
-$ npm run start:dev
-```
+3. .envの作成　以下の内容を記術
+  ```
+  DATABASE_URL="postgresql://for_y_user:Pass1234@localhost:5432/for_y_db?schema=public"
+  DB_USER=for_y_user
+  DB_PASSWORD=Pass1234
+  DB_NAME=for_y_db
+  ```
 
+4. **DBの作成**
+  ```bash
+  $ psql -U for_y_user -d for_y_db -h localhost -W
+  ```
+
+5. **実行**
+  ```bash
+  $ npm run start
+  ```
 ## 初期管理者アカウント
 
 アプリ起動時に以下の初期管理者ユーザーが自動的に作成されます。
