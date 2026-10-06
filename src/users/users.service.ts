@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   InternalServerErrorException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,11 +12,33 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { Department } from '../departments/entities/department.entity';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
+
+  async onModuleInit() {
+    await this.seedAdminUser();
+  }
+
+  private async seedAdminUser() {
+    const adminEmail = 'admin@ad.com';
+    const existingAdmin = await this.userRepository.findOne({
+      where: { email: adminEmail },
+    });
+
+    if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash('admin1904', 10);
+      const admin = this.userRepository.create({
+        username: 'administrator',
+        email: adminEmail,
+        password: hashedPassword,
+      });
+      await this.userRepository.save(admin);
+      console.log('初期管理者ユーザー (administrator) を作成しました。');
+    }
+  }
 
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     const { email, password, username } = createUserDto;

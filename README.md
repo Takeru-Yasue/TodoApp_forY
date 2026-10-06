@@ -78,6 +78,14 @@ $ npm install
 $ npm run start:dev
 ```
 
+## 初期管理者アカウント
+
+アプリ起動時に以下の初期管理者ユーザーが自動的に作成されます。
+
+- **ユーザー名**: `administrator`
+- **メールアドレス**: `admin@ad.com`
+- **パスワード**: `admin1904`
+
 
 ## Run tests
 
