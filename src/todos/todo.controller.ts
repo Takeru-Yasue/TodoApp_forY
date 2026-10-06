@@ -2,6 +2,7 @@ import {
   Controller,
   Param,
   Delete,
+  Post,
   Res,
   Req,
   UseGuards,
@@ -24,6 +25,18 @@ export class TodoController {
   ) {
     const user = (req as any).user as User;
     await this.todosService.remove(+id, user.id);
+    return res.redirect('/todos');
+  }
+
+  @Post(':id')
+  @UseGuards(AuthenticatedGuard)
+  async update(
+    @Param('id') id: string,
+    @Req() req: express.Request,
+    @Res() res: express.Response,
+  ) {
+    const user = (req as any).user as User;
+    await this.todosService.update(+id, req.body, user.id);
     return res.redirect('/todos');
   }
 }

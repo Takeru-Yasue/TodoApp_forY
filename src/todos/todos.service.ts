@@ -133,14 +133,58 @@ export class TodosService {
     });
   }
 
-  async update(id: number, updateTodoDto: UpdateTodoDto) {
-    const dueDate = updateTodoDto.dueDate
-      ? new Date(updateTodoDto.dueDate)
-      : undefined;
+  async update(id: number, updateTodoDto: any, userId?: number) {
+    const todo = await this.todoRepository.findOne({ where: { id } });
+    if (!todo) return null;
+
+    if (userId) {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['departments'],
+      });
+      const userDeptIds = (user?.departments ?? []).map((d) => d.id);
+      const isOwner = todo.userId === userId;
+      const isMemberOfDept =
+        todo.departmentId && userDeptIds.includes(todo.departmentId);
+      const isAdmin = user?.email === 'admin@ad.com';
+
+      if (!isOwner && !isMemberOfDept && !isAdmin) {
+        return null;
+      }
+    }
+
+    let dueDate = todo.dueDate;
+    if (updateTodoDto.date && updateTodoDto.time) {
+      dueDate = new Date(`${updateTodoDto.date} ${updateTodoDto.time}`);
+    }
+
+    const inputPeriod = String(updateTodoDto.period || '')
+      .trim()
+      .toLowerCase();
+    let finalPeriod = todo.period;
+
+    if (inputPeriod === 'auto') {
+      finalPeriod = this.calculatePeriod(dueDate);
+    } else if (inputPeriod === 'none') {
+      finalPeriod = '';
+    } else if (updateTodoDto.period !== undefined) {
+      finalPeriod = updateTodoDto.period;
+    }
+
+    const deptId =
+      updateTodoDto.departmentId !== undefined
+        ? updateTodoDto.departmentId
+          ? Number(updateTodoDto.departmentId)
+          : null
+        : todo.departmentId;
+
     await this.todoRepository.update(id, {
-      ...updateTodoDto,
-      ...(dueDate && { dueDate }),
+      title: updateTodoDto.title || todo.title,
+      dueDate: dueDate,
+      period: finalPeriod,
+      departmentId: deptId && !isNaN(deptId) ? deptId : null,
     });
+
     return this.findOne(id);
   }
 
@@ -149,15 +193,20 @@ export class TodosService {
       const todo = await this.todoRepository.findOne({ where: { id } });
       if (!todo) return;
 
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['departments'],
+      });
+
+      if (user?.email === 'admin@ad.com') {
+        return await this.todoRepository.delete(id);
+      }
+
       if (todo.userId === userId) {
         return await this.todoRepository.delete(id);
       }
 
       if (todo.departmentId) {
-        const user = await this.userRepository.findOne({
-          where: { id: userId },
-          relations: ['departments'],
-        });
         const userDeptIds = (user?.departments ?? []).map((d) => d.id);
         if (userDeptIds.includes(todo.departmentId)) {
           return await this.todoRepository.delete(id);
