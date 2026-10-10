@@ -46,13 +46,13 @@
 ## 使用技術
 
 ### バックエンド
-| 分類 | 技術 |
-| --- | --- |
-| 言語 | TypeScript 5 |
+| 分類 | 技術 | 選定理由 |
+| --- | --- | --- |
+| 言語 | TypeScript 5 | 型安全性の確保ができる |
 | ランタイム | Node.js(22系) |
-| フレームワーク | NestJS 11(Express) |
-| ORM | TypeORM 0.3 |
-| データベース | PostgreSQL |
+| フレームワーク | NestJS 11(Express) | module,controller,serviceが強制され、コードの可読性・一貫性を確保できる |
+| ORM | TypeORM 0.3 | TSと相性のいいORMapperなため |
+| データベース | PostgreSQL | 強力なACID準拠によりデータの破損が起こりづらい |
 
 ### フロントエンド
 | 分類 | 技術 |
