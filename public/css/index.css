@@ -305,10 +305,6 @@ input:focus, select:focus {
     .form-row > .form-group {
         flex: 1 0 100% !important;
     }
-    
-    .add-card {
-        /* padding: 1rem; は削除。header/bodyで制御するため */
-    }
 
     .add-card-header {
         padding: 0.75rem 1rem;
