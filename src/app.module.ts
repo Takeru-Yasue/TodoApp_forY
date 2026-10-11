@@ -9,6 +9,8 @@ import { Todo } from './todos/entities/todo.entity';
 import { User } from './users/entities/user.entity';
 import { Department } from './departments/entities/department.entity';
 import * as dotenv from 'dotenv';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 dotenv.config();
 
@@ -23,6 +25,9 @@ dotenv.config();
     TodosModule,
     UsersModule,
     DepartmentsModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
