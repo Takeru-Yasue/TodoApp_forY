@@ -1,0 +1,23 @@
+:root {
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --danger: #ef4444;
+    --danger-bg: #fff1f2;
+    --danger-border: #fecdd3;
+    --success: #22c55e;
+    --success-bg: #f0fdf4;
+    --success-border: #bbf7d0;
+    --border: #e2e8f0;
+    --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    min-height: 100vh;
+}
