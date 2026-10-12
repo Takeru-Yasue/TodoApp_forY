@@ -6,6 +6,15 @@ import {
 } from "@nestjs/common";
 import { Request, Response } from "express";
 
+interface RegisterBody {
+  email?: unknown;
+  username?: unknown;
+}
+
+function toText(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
 @Catch(BadRequestException)
 export class RegisterValidationFilter implements ExceptionFilter {
   catch(exception: BadRequestException, host: ArgumentsHost) {
@@ -24,13 +33,15 @@ export class RegisterValidationFilter implements ExceptionFilter {
 
     const message = Array.isArray(rawMessage)
       ? rawMessage.join("、")
-      : rawMessage || "ユーザー登録に失敗しました。";
+      : (rawMessage ?? "ユーザー登録に失敗しました。");
+
+    const body = request.body as RegisterBody;
 
     response.status(400).render("register", {
       error: message,
       values: {
-        email: request.body?.email || "",
-        username: request.body?.username || "",
+        email: toText(body.email),
+        username: toText(body.username),
       },
     });
   }
