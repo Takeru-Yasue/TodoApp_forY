@@ -4,7 +4,6 @@ import {
   Post,
   Param,
   Body,
-  Req,
   Res,
   Render,
   UseGuards,
@@ -18,6 +17,21 @@ import { UsersService } from "../users/users.service";
 import { AuthenticatedGuard } from "../users/guards/authenticated.guard";
 import { User } from "../users/entities/user.entity";
 import { CurrentUser } from "src/users/decorator/current-user.decorator";
+import { HttpException } from "@nestjs/common";
+import { UpdateMembersDto } from "./dto/update-members.dto";
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof HttpException) {
+    const res = error.getResponse();
+    if (typeof res === "string") return res;
+    if (typeof res === "object" && "message" in res) {
+      const m = (res as { message: string | string[] }).message;
+      return Array.isArray(m) ? m.join(", ") : m;
+    }
+  }
+  if (error instanceof Error) return error.message;
+  return fallback;
+}
 
 @Controller("departments")
 @UseGuards(AuthenticatedGuard)
@@ -28,29 +42,29 @@ export class DepartmentsController {
   ) {}
 
   /** 部署一覧ページ */
-@Get()
-@Render("departments/index")
-async index(@CurrentUser() currentUser: User) {
-  const departments = await this.departmentsService.findAll();
-  const userWithDepts = await this.usersService.findByIdWithDepartments(
-    currentUser.id,
-  );
-  const myDeptIds = (userWithDepts?.departments ?? []).map((d) => d.id);
-  return { departments, currentUser, myDeptIds, error: null, success: null };
-}
+  @Get()
+  @Render("departments/index")
+  async index(@CurrentUser() currentUser: User) {
+    const departments = await this.departmentsService.findAll();
+    const userWithDepts = await this.usersService.findByIdWithDepartments(
+      currentUser.id,
+    );
+    const myDeptIds = (userWithDepts?.departments ?? []).map((d) => d.id);
+    return { departments, currentUser, myDeptIds, error: null, success: null };
+  }
 
   /** 部署を新規作成（ログイン済みなら誰でも可） */
   @Post()
   async create(
     @Body() dto: CreateDepartmentDto,
     @Res() res: express.Response,
-    @CurrentUser() currentUser: User
+    @CurrentUser() currentUser: User,
   ) {
     try {
       await this.departmentsService.create(dto, currentUser.id);
       res.redirect("/departments");
       return;
-    } catch (error: any) {
+    } catch (error) {
       const departments = await this.departmentsService.findAll();
       const userWithDepts = await this.usersService.findByIdWithDepartments(
         currentUser.id,
@@ -60,8 +74,7 @@ async index(@CurrentUser() currentUser: User) {
         departments,
         currentUser,
         myDeptIds,
-        error:
-          error?.response?.message || error?.message || "作成に失敗しました",
+        error: getErrorMessage(error, "作成に失敗しました"),
         success: null,
       });
       return;
@@ -73,13 +86,13 @@ async index(@CurrentUser() currentUser: User) {
   async remove(
     @Param("id", ParseIntPipe) id: number,
     @Res() res: express.Response,
-    @CurrentUser() currentUser: User
+    @CurrentUser() currentUser: User,
   ) {
     try {
       await this.departmentsService.remove(id, currentUser);
       res.redirect("/departments");
       return;
-    } catch (error: any) {
+    } catch (error) {
       const departments = await this.departmentsService.findAll();
       const userWithDepts = await this.usersService.findByIdWithDepartments(
         currentUser.id,
@@ -89,8 +102,7 @@ async index(@CurrentUser() currentUser: User) {
         departments,
         currentUser,
         myDeptIds,
-        error:
-          error?.response?.message || error?.message || "削除に失敗しました",
+        error: getErrorMessage(error, "削除に失敗しました"),
         success: null,
       });
       return;
@@ -102,12 +114,12 @@ async index(@CurrentUser() currentUser: User) {
   @Render("departments/manage")
   async showManagePage(
     @Param("id", ParseIntPipe) id: number,
-    @CurrentUser() currentUser: User
+    @CurrentUser() currentUser: User,
   ) {
     const dept = await this.departmentsService.findOneWithMembers(id);
     const allUsers = await this.usersService.findAll();
     const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
-    const memberIds = (dept.users || []).map((u) => u.id);
+    const memberIds = (dept.users ?? []).map((u) => u.id);
     const isAdmin = currentUser.email === "admin@ad.com";
     const isMaster = dept.masterId === currentUser.id || isAdmin;
 
@@ -129,7 +141,7 @@ async index(@CurrentUser() currentUser: User) {
   async join(
     @Param("id", ParseIntPipe) id: number,
     @Res() res: express.Response,
-    @CurrentUser() currentUser: User
+    @CurrentUser() currentUser: User,
   ) {
     const dept = await this.departmentsService.findOne(id);
     const userWithDepts = await this.usersService.findByIdWithDepartments(
@@ -150,7 +162,7 @@ async index(@CurrentUser() currentUser: User) {
   async leave(
     @Param("id", ParseIntPipe) id: number,
     @Res() res: express.Response,
-    @CurrentUser() currentUser: User
+    @CurrentUser() currentUser: User,
   ) {
     const userWithDepts = await this.usersService.findByIdWithDepartments(
       currentUser.id,
@@ -168,27 +180,20 @@ async index(@CurrentUser() currentUser: User) {
   @Post(":id/members")
   async updateMembers(
     @Param("id", ParseIntPipe) id: number,
-    @Req() req: express.Request,
+    @Body() dto: UpdateMembersDto,
     @Res() res: express.Response,
-    @CurrentUser() currentUser: User
+    @CurrentUser() currentUser: User,
   ) {
-    const rawUserIds = req.body.memberUserIds;
-    const memberUserIds: number[] = rawUserIds
-      ? (Array.isArray(rawUserIds) ? rawUserIds : [rawUserIds])
-          .map(Number)
-          .filter((n: number) => !isNaN(n))
-      : [];
-
     try {
       await this.departmentsService.updateMembers(
         id,
-        memberUserIds,
+        dto.memberUserIds,
         currentUser,
       );
       const dept = await this.departmentsService.findOneWithMembers(id);
       const allUsers = await this.usersService.findAll();
       const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
-      const memberIds = (dept.users || []).map((u) => u.id);
+      const memberIds = (dept.users ?? []).map((u) => u.id);
       const isAdmin = currentUser.email === "admin@ad.com";
       const isMaster = dept.masterId === currentUser.id || isAdmin;
 
@@ -204,11 +209,11 @@ async index(@CurrentUser() currentUser: User) {
         success: "所属メンバーを更新しました。",
       });
       return;
-    } catch (error: any) {
+    } catch (error) {
       const dept = await this.departmentsService.findOneWithMembers(id);
       const allUsers = await this.usersService.findAll();
       const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
-      const memberIds = (dept.users || []).map((u) => u.id);
+      const memberIds = (dept.users ?? []).map((u) => u.id);
       const isAdmin = currentUser.email === "admin@ad.com";
       const isMaster = dept.masterId === currentUser.id || isAdmin;
 
@@ -220,7 +225,7 @@ async index(@CurrentUser() currentUser: User) {
         memberIds,
         isMaster,
         isAdmin,
-        error: error?.response?.message || "メンバー更新に失敗しました",
+        error: getErrorMessage(error, "メンバー更新に失敗しました"),
         success: null,
       });
       return;
@@ -233,22 +238,22 @@ async index(@CurrentUser() currentUser: User) {
     @Param("id", ParseIntPipe) id: number,
     @Body("newMasterId") newMasterIdStr: string,
     @Res() res: express.Response,
-    @CurrentUser() currentUser: User
+    @CurrentUser() currentUser: User,
   ) {
     const newMasterId = parseInt(newMasterIdStr, 10);
     if (isNaN(newMasterId)) {
-      res.redirect(`/departments/${id}/manage`);
+      res.redirect(`/departments/${String(id)}/manage`);
       return;
     }
     try {
       await this.departmentsService.updateMaster(id, newMasterId, currentUser);
       res.redirect("/departments");
       return;
-    } catch (error: any) {
+    } catch (error) {
       const dept = await this.departmentsService.findOneWithMembers(id);
       const allUsers = await this.usersService.findAll();
       const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
-      const memberIds = (dept.users || []).map((u) => u.id);
+      const memberIds = (dept.users ?? []).map((u) => u.id);
       const isAdmin = currentUser.email === "admin@ad.com";
       const isMaster = dept.masterId === currentUser.id || isAdmin;
       res.status(HttpStatus.FORBIDDEN).render("departments/manage", {
@@ -259,7 +264,7 @@ async index(@CurrentUser() currentUser: User) {
         memberIds,
         isMaster,
         isAdmin,
-        error: error?.response?.message || "変更に失敗しました",
+        error: getErrorMessage(error, "変更に失敗しました"),
         success: null,
       });
       return;
