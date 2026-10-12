@@ -20,6 +20,7 @@
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 0.5rem;
 }
+
 .dept-checkbox {
     display: flex;
     align-items: center;
@@ -32,11 +33,13 @@
     font-size: 0.875rem;
     user-select: none;
 }
+
 .dept-checkbox:hover,
 .dept-checkbox.checked {
     border-color: var(--primary);
     background: #eef2ff;
 }
+
 .dept-checkbox input[type="checkbox"] {
     width: 16px;
     height: 16px;

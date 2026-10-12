@@ -2,7 +2,7 @@
     --primary: #6366f1;
     --primary-hover: #4f46e5;
     --bg: #f8fafc;
-    --card-bg: #ffffff;
+    --card-bg: #fff;
     --text-main: #1e293b;
     --text-muted: #64748b;
     --danger: #ef4444;
@@ -23,7 +23,7 @@
 }
 
 body {
-    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    font-family: Inter, 'Noto Sans JP', sans-serif;
     background-color: var(--bg);
     color: var(--text-main);
     margin: 0;
@@ -197,21 +197,21 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
 }
 
 .complete-btn:hover {
     color: var(--success);
     background: #f0fdf4;
     border-color: var(--success);
-    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
+    box-shadow: 0 2px 4px rgb(34 197 94 / 10%);
 }
 
 .add-card {
     background: var(--card-bg);
     padding: 0; /* ヘッダーとボディで個別にパディングを設定 */
     border-radius: 16px;
-    box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05);
+    box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 5%);
     border: 1px solid var(--border);
     flex-shrink: 0;
     overflow: hidden;
@@ -250,7 +250,7 @@ h1 {
 }
 
 .add-card-body {
-    padding: 0 1.25rem 1.25rem 1.25rem;
+    padding: 0 1.25rem 1.25rem;
     max-height: 500px;
     transition: max-height 0.3s ease-out, opacity 0.2s, padding 0.3s;
     opacity: 1;
@@ -289,7 +289,7 @@ input, select {
 input:focus, select:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 10%);
 }
 
 .form-row {
@@ -298,10 +298,11 @@ input:focus, select:focus {
     flex-wrap: wrap;
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
     .form-row {
         gap: 0;
     }
+
     .form-row > .form-group {
         flex: 1 0 100% !important;
     }
@@ -311,7 +312,7 @@ input:focus, select:focus {
     }
 
     .add-card-body {
-        padding: 0 1rem 1rem 1rem;
+        padding: 0 1rem 1rem;
     }
 
     .add-card.collapsed .add-card-body {
@@ -352,13 +353,14 @@ input:focus, select:focus {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(15, 23, 42, 0.4);
+    background: rgb(15 23 42 / 40%);
     backdrop-filter: blur(2px);
     z-index: 998;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.25s ease, visibility 0.25s ease;
 }
+
 .filter-drawer-backdrop.open {
     opacity: 1;
     visibility: visible;
@@ -371,8 +373,8 @@ input:focus, select:focus {
     width: 320px;
     max-width: 85vw;
     height: 100vh;
-    background: #ffffff;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+    background: #fff;
+    box-shadow: -4px 0 24px rgb(0 0 0 / 12%);
     z-index: 999;
     transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
@@ -380,6 +382,7 @@ input:focus, select:focus {
     padding: 1.5rem;
     box-sizing: border-box;
 }
+
 .filter-drawer.open {
     right: 0;
 }
@@ -392,6 +395,7 @@ input:focus, select:focus {
     border-bottom: 1px solid var(--border);
     margin-bottom: 1.5rem;
 }
+
 .drawer-header h2 {
     font-size: 1.1rem;
     font-weight: 700;
@@ -401,6 +405,7 @@ input:focus, select:focus {
     gap: 0.5rem;
     color: var(--text-main);
 }
+
 .close-drawer-btn {
     background: transparent;
     border: none;
@@ -411,6 +416,7 @@ input:focus, select:focus {
     border-radius: 6px;
     transition: background 0.15s, color 0.15s;
 }
+
 .close-drawer-btn:hover {
     background: #f1f5f9;
     color: var(--text-main);
@@ -419,6 +425,7 @@ input:focus, select:focus {
 .filter-field {
     margin-bottom: 1.25rem;
 }
+
 .filter-field label {
     display: block;
     font-size: 0.85rem;
@@ -432,7 +439,7 @@ input:focus, select:focus {
     align-items: center;
     gap: 0.5rem;
     padding: 0.45rem 0.85rem;
-    background: #ffffff;
+    background: #fff;
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 0.875rem;
@@ -440,18 +447,21 @@ input:focus, select:focus {
     color: var(--text-main);
     cursor: pointer;
     transition: all 0.15s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
 }
+
 .filter-btn:hover {
     border-color: var(--primary);
     color: var(--primary);
     background: #f8fafc;
 }
+
 .filter-btn.active {
     border-color: var(--primary);
     background: #eef2ff;
     color: var(--primary);
 }
+
 .active-dot {
     width: 7px;
     height: 7px;
