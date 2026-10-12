@@ -11,6 +11,7 @@ import * as express from "express";
 import { TodosService } from "./todos.service";
 import { AuthenticatedGuard } from "../users/guards/authenticated.guard";
 import { User } from "../users/entities/user.entity";
+import { CurrentUser } from "src/users/decorator/current-user.decorator";
 
 @Controller("todo")
 export class TodoController {
@@ -20,11 +21,10 @@ export class TodoController {
   @UseGuards(AuthenticatedGuard)
   async remove(
     @Param("id") id: string,
-    @Req() req: express.Request,
     @Res() res: express.Response,
+    @CurrentUser() currentUser: User,
   ) {
-    const user = (req as any).user as User;
-    await this.todosService.remove(+id, user.id);
+    await this.todosService.remove(+id, currentUser.id);
     res.redirect("/todos");
   }
 
@@ -34,9 +34,9 @@ export class TodoController {
     @Param("id") id: string,
     @Req() req: express.Request,
     @Res() res: express.Response,
+    @CurrentUser() currentUser: User,
   ) {
-    const user = (req as any).user as User;
-    await this.todosService.update(+id, req.body, user.id);
+    await this.todosService.update(+id, req.body, currentUser.id);
     res.redirect("/todos");
   }
 }
