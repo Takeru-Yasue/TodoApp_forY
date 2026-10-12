@@ -1,9 +1,10 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, In } from "typeorm";
+import { Repository, In, FindOptionsWhere } from "typeorm";
 import { CreateTodoDto } from "./dto/create-todo.dto";
 import { Todo } from "./entities/todo.entity";
 import { User } from "../users/entities/user.entity";
+import { UpdateTodoDto } from "./dto/update-todo.dto";
 
 @Injectable()
 export class TodosService {
@@ -23,9 +24,7 @@ export class TodosService {
         dueDate = new Date();
       }
 
-      const inputPeriod = String(createTodoDto.period || "")
-        .trim()
-        .toLowerCase();
+      const inputPeriod = createTodoDto.period ?? "".trim().toLowerCase();
       let finalPeriod = "";
 
       if (inputPeriod === "auto") {
@@ -33,12 +32,10 @@ export class TodosService {
       } else if (inputPeriod === "none" || inputPeriod === "") {
         finalPeriod = "";
       } else {
-        finalPeriod = createTodoDto.period || ""; // 元の文字列（漢字など）を維持
+        finalPeriod = createTodoDto.period ?? ""; // 元の文字列（漢字など）を維持
       }
 
-      const deptId = createTodoDto.departmentId
-        ? Number(createTodoDto.departmentId)
-        : null;
+      const deptId = createTodoDto.departmentId ?? null;
 
       const todo = this.todoRepository.create({
         title: createTodoDto.title,
@@ -88,7 +85,10 @@ export class TodosService {
 
   async findAll(userId?: number) {
     try {
-      let whereConditions: any = undefined;
+      let whereConditions:
+        | FindOptionsWhere<Todo>
+        | FindOptionsWhere<Todo>[]
+        | undefined;
 
       if (userId !== undefined) {
         const user = await this.userRepository.findOne({
@@ -129,7 +129,7 @@ export class TodosService {
     });
   }
 
-  async update(id: number, updateTodoDto: any, userId?: number) {
+  async update(id: number, updateTodoDto: UpdateTodoDto, userId?: number) {
     const todo = await this.todoRepository.findOne({ where: { id } });
     if (!todo) return null;
 
@@ -154,9 +154,7 @@ export class TodosService {
       dueDate = new Date(`${updateTodoDto.date} ${updateTodoDto.time}`);
     }
 
-    const inputPeriod = String(updateTodoDto.period || "")
-      .trim()
-      .toLowerCase();
+    const inputPeriod = updateTodoDto.period ?? "".trim().toLowerCase();
     let finalPeriod = todo.period;
 
     if (inputPeriod === "auto") {
@@ -170,12 +168,12 @@ export class TodosService {
     const deptId =
       updateTodoDto.departmentId !== undefined
         ? updateTodoDto.departmentId
-          ? Number(updateTodoDto.departmentId)
+          ? updateTodoDto.departmentId
           : null
         : todo.departmentId;
 
     await this.todoRepository.update(id, {
-      title: updateTodoDto.title || todo.title,
+      title: updateTodoDto.title ?? todo.title,
       dueDate: dueDate,
       period: finalPeriod,
       departmentId: deptId && !isNaN(deptId) ? deptId : null,
