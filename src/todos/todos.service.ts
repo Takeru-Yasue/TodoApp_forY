@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, In } from "typeorm";
 import { CreateTodoDto } from "./dto/create-todo.dto";
-import { UpdateTodoDto } from "./dto/update-todo.dto";
 import { Todo } from "./entities/todo.entity";
 import { User } from "../users/entities/user.entity";
 
