@@ -80,13 +80,8 @@ export class UsersController {
 
   @Get("login")
   @Render("login")
-  showLoginPage(@Body() loginUserDto: LoginUserDto) {
-    return {
-      error: null,
-      values: {
-        email: loginUserDto.email || "",
-      },
-    };
+  showLoginPage() {
+    return { error: null, values: {} };
   }
 
   @Post("login")
