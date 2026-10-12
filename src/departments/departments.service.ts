@@ -33,7 +33,7 @@ export class DepartmentsService {
       relations: ["master"],
     });
     if (!dept) {
-      throw new NotFoundException(`部署ID ${id} が見つかりません`);
+      throw new NotFoundException(`部署ID ${String(id)} が見つかりません`);
     }
     return dept;
   }
@@ -45,13 +45,13 @@ export class DepartmentsService {
       relations: ["master", "users"],
     });
     if (!dept) {
-      throw new NotFoundException(`部署ID ${id} が見つかりません`);
+      throw new NotFoundException(`部署ID ${String(id)} が見つかりません`);
     }
     return dept;
   }
 
   async findByIds(ids: number[]): Promise<Department[]> {
-    if (!ids || ids.length === 0) return [];
+    if (ids.length === 0) return [];
     return this.departmentRepository.find({ where: { id: In(ids) } });
   }
 
@@ -66,7 +66,11 @@ export class DepartmentsService {
     if (existing) {
       throw new ConflictException("同名の部署が既に存在します");
     }
-    const dept = this.departmentRepository.create({ ...dto, masterId });
+    const dept = this.departmentRepository.create({
+      name: dto.name,
+      description: dto.description,
+      masterId,
+    });
     const savedDept = await this.departmentRepository.save(dept);
 
     // 作成者を自動的に部署の所属メンバーに追加する
@@ -75,7 +79,7 @@ export class DepartmentsService {
       relations: ["departments"],
     });
     if (user) {
-      if (!user.departments) user.departments = [];
+      user.departments ??= [];
       if (!user.departments.some((d) => d.id === savedDept.id)) {
         user.departments.push(savedDept);
         await this.userRepository.save(user);
@@ -153,7 +157,7 @@ export class DepartmentsService {
     const savedDept = await this.departmentRepository.save(dept);
 
     // 新マスターを自動的に所属メンバーに追加
-    if (!newMaster.departments) newMaster.departments = [];
+    newMaster.departments ??= [];
     if (!newMaster.departments.some((d) => d.id === savedDept.id)) {
       newMaster.departments.push(savedDept);
       await this.userRepository.save(newMaster);
