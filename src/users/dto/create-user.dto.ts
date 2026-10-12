@@ -21,7 +21,7 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   username?: string | null;
-  
+
   @IsOptional()
   @Transform(({ value }: { value: unknown }) => {
     if (value === undefined || value === null || value === "") return [];

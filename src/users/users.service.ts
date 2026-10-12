@@ -57,7 +57,7 @@ export class UsersService implements OnModuleInit {
       const user = this.userRepository.create({
         email,
         password: hashedPassword,
-        username: username || undefined,
+        username: username ?? undefined,
       });
 
       const savedUser = await this.userRepository.save(user);
