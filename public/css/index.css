@@ -103,8 +103,22 @@ h1 {
   border-color: var(--overdue-border);
 }
 
+.todo-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
 .todo-item.overdue .todo-title {
   color: var(--overdue-text);
+}
+
+.period-badge {
+  background: #eef2ff;
+  color: var(--primary);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .todo-item.overdue .period-badge {
@@ -146,11 +160,6 @@ h1 {
   margin-bottom: 0.25rem;
 }
 
-.todo-title {
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
 .overdue-label,
 .approaching-label {
   font-size: 0.7rem;
@@ -169,15 +178,6 @@ h1 {
 .approaching-label {
   background: var(--approaching-text);
   color: white;
-}
-
-.period-badge {
-  background: #eef2ff;
-  color: var(--primary);
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 .todo-meta {
