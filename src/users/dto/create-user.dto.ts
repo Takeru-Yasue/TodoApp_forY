@@ -1,5 +1,7 @@
+import { Transform } from "class-transformer";
 import {
   IsEmail,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -19,4 +21,12 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   username?: string | null;
+  
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => {
+    if (value === undefined || value === null || value === "") return [];
+    return (Array.isArray(value) ? value : [value]).map(Number);
+  })
+  @IsInt({ each: true })
+  departmentIds: number[] = [];
 }

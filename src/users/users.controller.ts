@@ -5,7 +5,6 @@ import {
   Body,
   Render,
   Res,
-  Req,
   HttpStatus,
   UseFilters,
   UseGuards,
@@ -18,6 +17,8 @@ import { RegisterValidationFilter } from "./register-validation.filter";
 import { DepartmentsService } from "../departments/departments.service";
 import { AuthenticatedGuard } from "./guards/authenticated.guard";
 import { User } from "./entities/user.entity";
+import { CurrentUser } from "./decorator/current-user.decorator";
+import { DepartmentIdsDto } from "./dto/departments-ids.dto";
 
 const AUTH_COOKIE_NAME = "userId";
 const COOKIE_OPTIONS: express.CookieOptions = {
@@ -46,38 +47,30 @@ export class UsersController {
   async register(
     @Body() createUserDto: CreateUserDto,
     @Res() res: express.Response,
-    @Req() req: express.Request,
   ) {
     try {
       const user = await this.usersService.create(createUserDto);
 
-      // 部署の設定
-      const rawDeptIds = req.body.departmentIds;
-      if (rawDeptIds) {
-        const deptIds: number[] = (
-          Array.isArray(rawDeptIds) ? rawDeptIds : [rawDeptIds]
-        )
-          .map(Number)
-          .filter((n: number) => !isNaN(n));
-        const depts = await this.departmentsService.findByIds(deptIds);
+      if (createUserDto.departmentIds.length > 0) {
+        const depts = await this.departmentsService.findByIds(
+          createUserDto.departmentIds,
+        );
         await this.usersService.setDepartments(user.id, depts);
       }
 
-      // 登録成功時に自動ログインCookieを付与
       res.cookie(AUTH_COOKIE_NAME, String(user.id), COOKIE_OPTIONS);
       res.redirect("/todos");
       return;
-    } catch (error: any) {
+    } catch (error) {
       const departments = await this.departmentsService.findAll();
-      const message =
-        error?.response?.message ||
-        error?.message ||
-        "ユーザー登録に失敗しました。";
       res.status(HttpStatus.BAD_REQUEST).render("register", {
-        error: Array.isArray(message) ? message.join("、") : message,
+        error:
+          error instanceof Error
+            ? error.message
+            : "ユーザー登録に失敗しました。",
         values: {
-          email: createUserDto.email || "",
-          username: createUserDto.username || "",
+          email: createUserDto.email,
+          username: createUserDto.username,
         },
         departments,
       });
@@ -87,8 +80,13 @@ export class UsersController {
 
   @Get("login")
   @Render("login")
-  showLoginPage() {
-    return { error: null, values: {} };
+  showLoginPage(@Body() loginUserDto: LoginUserDto) {
+    return {
+      error: null,
+      values: {
+        email: loginUserDto.email || "",
+      },
+    };
   }
 
   @Post("login")
@@ -123,12 +121,10 @@ export class UsersController {
   }
 
   // ---- プロフィールページ ----
-
   @Get("profile")
   @UseGuards(AuthenticatedGuard)
   @Render("profile")
-  async showProfilePage(@Req() req: express.Request) {
-    const user = (req as any).user as User;
+  async showProfilePage(@CurrentUser() user: User) {
     const userWithDepts = await this.usersService.findByIdWithDepartments(
       user.id,
     );
@@ -146,19 +142,11 @@ export class UsersController {
   @Post("profile")
   @UseGuards(AuthenticatedGuard)
   async updateProfile(
-    @Req() req: express.Request,
+    @Body() dto: DepartmentIdsDto,
+    @CurrentUser() user: User,
     @Res() res: express.Response,
   ) {
-    const user = (req as any).user as User;
-    const rawDeptIds = req.body.departmentIds;
-
-    const deptIds: number[] = rawDeptIds
-      ? (Array.isArray(rawDeptIds) ? rawDeptIds : [rawDeptIds])
-          .map(Number)
-          .filter((n: number) => !isNaN(n))
-      : [];
-
-    const depts = await this.departmentsService.findByIds(deptIds);
+    const depts = await this.departmentsService.findByIds(dto.departmentIds);
     await this.usersService.setDepartments(user.id, depts);
 
     const allDepartments = await this.departmentsService.findAll();
