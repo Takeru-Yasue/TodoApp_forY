@@ -1,66 +1,77 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ログイン - やることリスト</title>
     <%- include('head') %>
-    <link rel="stylesheet" href="/css/login.css">
-    <link rel="stylesheet" href="/css/auth-base.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/css/login.css" />
+    <link rel="stylesheet" href="/css/auth-base.css" />
+  </head>
+  <body>
     <div class="card">
-        <div class="header">
-            <h1>ログイン</h1>
-            <p>メールアドレスとパスワードを入力してください</p>
+      <div class="header">
+        <h1>ログイン</h1>
+        <p>メールアドレスとパスワードを入力してください</p>
+      </div>
+
+      <% if (error) { %>
+      <div class="alert-error">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span><%= error %></span>
+      </div>
+      <% } %>
+
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label for="email">メールアドレス</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            placeholder="user@example.com"
+            value="<%= values && values.email ? values.email : '' %>"
+          />
         </div>
 
-        <% if (error) { %>
-            <div class="alert-error">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <span><%= error %></span>
-            </div>
-        <% } %>
-
-        <form action="/login" method="POST">
-            <div class="form-group">
-                <label for="email">メールアドレス</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    required 
-                    placeholder="user@example.com" 
-                    value="<%= values && values.email ? values.email : '' %>"
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="password">パスワード</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    required 
-                    placeholder="パスワードを入力"
-                >
-            </div>
-
-            <button type="submit" class="btn-submit">ログイン</button>
-        </form>
-
-        <div class="footer-links">
-            <div>
-                アカウントをお持ちでないですか？ <a href="/register">新規登録</a>
-            </div>
-            <div>
-                <a href="/todos" style="font-weight: normal; color: var(--text-muted);">Todo一覧に戻る</a>
-            </div>
+        <div class="form-group">
+          <label for="password">パスワード</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            placeholder="パスワードを入力"
+          />
         </div>
+
+        <button type="submit" class="btn-submit">ログイン</button>
+      </form>
+
+      <div class="footer-links">
+        <div>
+          アカウントをお持ちでないですか？ <a href="/register">新規登録</a>
+        </div>
+        <div>
+          <a href="/todos" style="font-weight: normal; color: var(--text-muted)"
+            >Todo一覧に戻る</a
+          >
+        </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>

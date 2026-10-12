@@ -1,89 +1,145 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>部署一覧 - やることリスト</title>
     <%- include('../head') %>
-    <link rel="stylesheet" href="/css/departments/base.css">
-    <link rel="stylesheet" href="/css/departments/index.css">
-</head>
-<body>
-<div class="container">
-    <div class="page-header">
+    <link rel="stylesheet" href="/css/departments/base.css" />
+    <link rel="stylesheet" href="/css/departments/index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
         <h1>🏢 部署一覧</h1>
         <a href="/todos" class="back-link">← Todo一覧に戻る</a>
-    </div>
+      </div>
 
-    <% if (error) { %>
-    <div class="alert alert-error">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <% if (error) { %>
+      <div class="alert alert-error">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
         <%= error %>
-    </div>
-    <% } %>
-    <% if (success) { %>
-    <div class="alert alert-success">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <% } %>
+      <% if (success) { %>
+      <div class="alert alert-success">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
         <%= success %>
-    </div>
-    <% } %>
+      </div>
+      <% } %>
 
-    <!-- 新規部署作成 -->
-    <div class="create-card">
+      <!-- 新規部署作成 -->
+      <div class="create-card">
         <h2>New Department</h2>
         <form action="/departments" method="POST">
-            <div class="form-row">
-                <input type="text" name="name" placeholder="部署名 (例: 3年1組)" required maxlength="50">
-                <input type="text" name="description" placeholder="説明 (任意)" maxlength="100">
-                <button type="submit" class="btn btn-primary">作成</button>
-            </div>
+          <div class="form-row">
+            <input
+              type="text"
+              name="name"
+              placeholder="部署名 (例: 3年1組)"
+              required
+              maxlength="50"
+            />
+            <input
+              type="text"
+              name="description"
+              placeholder="説明 (任意)"
+              maxlength="100"
+            />
+            <button type="submit" class="btn btn-primary">作成</button>
+          </div>
         </form>
-    </div>
+      </div>
 
-    <!-- 部署一覧 -->
-    <% if (departments.length === 0) { %>
-    <div class="empty-state">まだ部署がありません。最初の部署を作成しましょう。</div>
-    <% } else { %>
-    <div class="dept-list">
-        <% departments.forEach(dept => {
-            const isAdmin = currentUser.email === 'admin@ad.com';
-            const isMaster = dept.masterId === currentUser.id || isAdmin;
-            const isMember = myDeptIds.includes(dept.id);
-        %>
+      <!-- 部署一覧 -->
+      <% if (departments.length === 0) { %>
+      <div class="empty-state">
+        まだ部署がありません。最初の部署を作成しましょう。
+      </div>
+      <% } else { %>
+      <div class="dept-list">
+        <% departments.forEach(dept => { const isAdmin = currentUser.email ===
+        'admin@ad.com'; const isMaster = dept.masterId === currentUser.id ||
+        isAdmin; const isMember = myDeptIds.includes(dept.id); %>
         <div class="dept-card <%= isMember ? 'is-member' : '' %>">
-            <div class="dept-info">
-                <div class="dept-name">
-                    <%= dept.name %>
-                    <% if (dept.masterId === currentUser.id) { %><span class="dept-badge master">マスター</span><% } %>
-                    <% if (isAdmin) { %><span class="dept-badge master" style="background:#fee2e2; color:#dc2626;">管理者</span><% } %>
-                    <% if (isMember) { %><span class="dept-badge">所属中</span><% } %>
-                </div>
-                <div class="dept-meta">
-                    <% if (dept.description) { %><%= dept.description %> · <% } %>
-                    管理者: <strong><%= dept.master ? (dept.master.username || dept.master.email.split('@')[0]) : '未設定' %></strong>
-                </div>
+          <div class="dept-info">
+            <div class="dept-name">
+              <%= dept.name %> <% if (dept.masterId === currentUser.id) {
+              %><span class="dept-badge master">マスター</span
+              ><% } %>
+              <% if (isAdmin) { %><span
+                class="dept-badge master"
+                style="background: #fee2e2; color: #dc2626"
+                >管理者</span
+              ><% } %>
+              <% if (isMember) { %><span class="dept-badge">所属中</span
+              ><% } %>
             </div>
-            <div class="dept-actions">
-                <% if (isMember) { %>
-                    <form action="/departments/<%= dept.id %>/leave" method="POST">
-                        <button type="submit" class="btn btn-ghost" style="color: var(--danger);">脱退</button>
-                    </form>
-                <% } else { %>
-                    <form action="/departments/<%= dept.id %>/join" method="POST">
-                        <button type="submit" class="btn btn-primary">参加</button>
-                    </form>
-                <% } %>
-                <% if (isMaster) { %>
-                    <a href="/departments/<%= dept.id %>/manage" class="btn btn-ghost">管理</a>
-                    <form action="/departments/<%= dept.id %>/delete" method="POST" onsubmit="return confirm('「<%= dept.name %>」を削除しますか？\nメンバーの所属情報も削除されます。')">
-                        <button type="submit" class="btn btn-danger">削除</button>
-                    </form>
-                <% } %>
+            <div class="dept-meta">
+              <% if (dept.description) { %><%= dept.description %> · <% } %>
+              管理者:
+              <strong
+                ><%= dept.master ? (dept.master.username || dept.master.email.split('@')[0]) : '未設定' %></strong
+              >
             </div>
+          </div>
+          <div class="dept-actions">
+            <% if (isMember) { %>
+            <form action="/departments/<%= dept.id %>/leave" method="POST">
+              <button
+                type="submit"
+                class="btn btn-ghost"
+                style="color: var(--danger)"
+              >
+                脱退
+              </button>
+            </form>
+            <% } else { %>
+            <form action="/departments/<%= dept.id %>/join" method="POST">
+              <button type="submit" class="btn btn-primary">参加</button>
+            </form>
+            <% } %>
+            <% if (isMaster) { %>
+            <a href="/departments/<%= dept.id %>/manage" class="btn btn-ghost"
+              >管理</a
+            >
+            <form
+              action="/departments/<%= dept.id %>/delete"
+              method="POST"
+              onsubmit="
+                return confirm(
+                  '「<%= dept.name %>」を削除しますか？\nメンバーの所属情報も削除されます。',
+                );
+              "
+            >
+              <button type="submit" class="btn btn-danger">削除</button>
+            </form>
+            <% } %>
+          </div>
         </div>
         <% }) %>
+      </div>
+      <% } %>
     </div>
-    <% } %>
-</div>
-</body>
+  </body>
 </html>
