@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+
+      - name: Stylelint
+        run: npx stylelint "public/**/*.css"
+
+      - name: Prettier (EJS / CSS)
+        run: npx prettier --check "views/**/*.ejs" "public/**/*.css"
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test --if-present
