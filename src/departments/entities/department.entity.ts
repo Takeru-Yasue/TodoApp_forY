@@ -15,14 +15,14 @@ export class Department {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar',  unique: true })
   name!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar',  nullable: true })
   description?: string| null;
 
   /** 部署を管理できるマスターユーザーのID */
-  @Column({ nullable: true })
+  @Column({ type: 'varchar',  nullable: true })
   masterId?: number | null;
 
   /** マスターユーザー（削除時は NULL に） */

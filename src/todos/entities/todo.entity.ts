@@ -21,7 +21,7 @@ export class Todo {
   @Column()
   dueDate!: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   period?: string | null;
 
   @Column({ nullable: true })
