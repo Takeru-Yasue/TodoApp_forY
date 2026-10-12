@@ -17,6 +17,7 @@ import { CreateDepartmentDto } from "./dto/create-department.dto";
 import { UsersService } from "../users/users.service";
 import { AuthenticatedGuard } from "../users/guards/authenticated.guard";
 import { User } from "../users/entities/user.entity";
+import { CurrentUser } from "src/users/decorator/current-user.decorator";
 
 @Controller("departments")
 @UseGuards(AuthenticatedGuard)
@@ -27,26 +28,24 @@ export class DepartmentsController {
   ) {}
 
   /** 部署一覧ページ */
-  @Get()
-  @Render("departments/index")
-  async index(@Req() req: express.Request) {
-    const currentUser = (req as any).user as User;
-    const departments = await this.departmentsService.findAll();
-    const userWithDepts = await this.usersService.findByIdWithDepartments(
-      currentUser.id,
-    );
-    const myDeptIds = (userWithDepts?.departments ?? []).map((d) => d.id);
-    return { departments, currentUser, myDeptIds, error: null, success: null };
-  }
+@Get()
+@Render("departments/index")
+async index(@CurrentUser() currentUser: User) {
+  const departments = await this.departmentsService.findAll();
+  const userWithDepts = await this.usersService.findByIdWithDepartments(
+    currentUser.id,
+  );
+  const myDeptIds = (userWithDepts?.departments ?? []).map((d) => d.id);
+  return { departments, currentUser, myDeptIds, error: null, success: null };
+}
 
   /** 部署を新規作成（ログイン済みなら誰でも可） */
   @Post()
   async create(
     @Body() dto: CreateDepartmentDto,
-    @Req() req: express.Request,
     @Res() res: express.Response,
+    @CurrentUser() currentUser: User
   ) {
-    const currentUser = (req as any).user as User;
     try {
       await this.departmentsService.create(dto, currentUser.id);
       res.redirect("/departments");
@@ -73,10 +72,9 @@ export class DepartmentsController {
   @Post(":id/delete")
   async remove(
     @Param("id", ParseIntPipe) id: number,
-    @Req() req: express.Request,
     @Res() res: express.Response,
+    @CurrentUser() currentUser: User
   ) {
-    const currentUser = (req as any).user as User;
     try {
       await this.departmentsService.remove(id, currentUser);
       res.redirect("/departments");
@@ -104,9 +102,8 @@ export class DepartmentsController {
   @Render("departments/manage")
   async showManagePage(
     @Param("id", ParseIntPipe) id: number,
-    @Req() req: express.Request,
+    @CurrentUser() currentUser: User
   ) {
-    const currentUser = (req as any).user as User;
     const dept = await this.departmentsService.findOneWithMembers(id);
     const allUsers = await this.usersService.findAll();
     const candidateUsers = allUsers.filter((u) => u.id !== currentUser.id);
@@ -131,10 +128,9 @@ export class DepartmentsController {
   @Post(":id/join")
   async join(
     @Param("id", ParseIntPipe) id: number,
-    @Req() req: express.Request,
     @Res() res: express.Response,
+    @CurrentUser() currentUser: User
   ) {
-    const currentUser = (req as any).user as User;
     const dept = await this.departmentsService.findOne(id);
     const userWithDepts = await this.usersService.findByIdWithDepartments(
       currentUser.id,
@@ -153,10 +149,9 @@ export class DepartmentsController {
   @Post(":id/leave")
   async leave(
     @Param("id", ParseIntPipe) id: number,
-    @Req() req: express.Request,
     @Res() res: express.Response,
+    @CurrentUser() currentUser: User
   ) {
-    const currentUser = (req as any).user as User;
     const userWithDepts = await this.usersService.findByIdWithDepartments(
       currentUser.id,
     );
@@ -175,8 +170,8 @@ export class DepartmentsController {
     @Param("id", ParseIntPipe) id: number,
     @Req() req: express.Request,
     @Res() res: express.Response,
+    @CurrentUser() currentUser: User
   ) {
-    const currentUser = (req as any).user as User;
     const rawUserIds = req.body.memberUserIds;
     const memberUserIds: number[] = rawUserIds
       ? (Array.isArray(rawUserIds) ? rawUserIds : [rawUserIds])
@@ -237,10 +232,9 @@ export class DepartmentsController {
   async updateMaster(
     @Param("id", ParseIntPipe) id: number,
     @Body("newMasterId") newMasterIdStr: string,
-    @Req() req: express.Request,
     @Res() res: express.Response,
+    @CurrentUser() currentUser: User
   ) {
-    const currentUser = (req as any).user as User;
     const newMasterId = parseInt(newMasterIdStr, 10);
     if (isNaN(newMasterId)) {
       res.redirect(`/departments/${id}/manage`);
