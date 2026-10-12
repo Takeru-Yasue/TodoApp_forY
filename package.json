@@ -17,7 +17,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "lint:ci": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint:css": "stylelint \"public/**/*.css\"",
+    "format:check": "prettier --check \"views/**/*.ejs\" \"public/**/*.css\"",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint:ci && npm run lint:css && npm run format:check"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
