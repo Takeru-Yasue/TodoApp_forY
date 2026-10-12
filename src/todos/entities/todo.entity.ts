@@ -6,47 +6,47 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Department } from '../../departments/entities/department.entity';
+} from "typeorm";
+import { User } from "../../users/entities/user.entity";
+import { Department } from "../../departments/entities/department.entity";
 
 @Entity()
 export class Todo {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  title: string;
+  title!: string;
 
   @Column()
-  dueDate: Date;
+  dueDate!: Date;
+
+  @Column({ type: "varchar", nullable: true })
+  period?: string | null;
 
   @Column({ nullable: true })
-  period: string;
-
-  @Column({ nullable: true })
-  userId: number;
+  userId?: number | null;
 
   @ManyToOne(() => User, (user) => user.todos, {
-    onDelete: 'CASCADE',
+    onDelete: "CASCADE",
     nullable: true,
   })
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @JoinColumn({ name: "userId" })
+  user?: User | null;
 
   @Column({ nullable: true })
-  departmentId: number | null;
+  departmentId?: number | null;
 
   @ManyToOne(() => Department, {
-    onDelete: 'SET NULL',
+    onDelete: "SET NULL",
     nullable: true,
   })
-  @JoinColumn({ name: 'departmentId' })
-  department: Department | null;
+  @JoinColumn({ name: "departmentId" })
+  department?: Department | null;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

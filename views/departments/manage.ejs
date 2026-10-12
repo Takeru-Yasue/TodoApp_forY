@@ -1,100 +1,181 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= dept.name %> 管理 - やることリスト</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><!= dept.name !> 管理 - やることリスト</title>
     <%- include('../head') %>
-    <link rel="stylesheet" href="/css/departments/base.css">
-    <link rel="stylesheet" href="/css/departments/manage.css">
-</head>
-<body>
-<div class="container">
-    <a href="/departments" class="back-link">← 部署一覧に戻る</a>
+    <link rel="stylesheet" href="/css/departments/base.css" />
+    <link rel="stylesheet" href="/css/departments/manage.css" />
+  </head>
+  <body>
+    <div class="container">
+      <a href="/departments" class="back-link">← 部署一覧に戻る</a>
 
-    <div class="page-header">
-        <h1>🏢 <%= dept.name %></h1>
+      <div class="page-header">
+        <h1>
+          🏢
+          <%= dept.name %>
+        </h1>
         <% if (dept.description) { %>
         <p><%= dept.description %></p>
         <% } %>
-    </div>
+      </div>
 
-    <% if (error) { %>
-    <div class="alert alert-error">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <% if (error) { %>
+      <div class="alert alert-error">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
         <%= error %>
-    </div>
-    <% } %>
-    <% if (success) { %>
-    <div class="alert alert-success">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <% } %>
+      <% if (success) { %>
+      <div class="alert alert-success">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
         <%= success %>
-    </div>
-    <% } %>
+      </div>
+      <% } %>
 
-    <% if (!isMaster) { %>
-    <div class="not-master-notice">
+      <% if (!isMaster) { %>
+      <div class="not-master-notice">
         この部署の管理権限がありません。マスターユーザーのみが設定を変更できます。
-    </div>
-    <% } else { %>
+      </div>
+      <% } else { %>
 
-    <!-- 現在のマスター表示 -->
-    <div class="current-master">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <!-- 現在のマスター表示 -->
+      <div class="current-master">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+          />
+        </svg>
         <div>
-            <div class="current-master-label">現在のマスターユーザー</div>
-            <div class="current-master-name"><%= dept.master ? (dept.master.username || dept.master.email.split('@')[0]) : '未設定' %></div>
+          <div class="current-master-label">現在のマスターユーザー</div>
+          <div class="current-master-name">
+            <%= dept.master ? (dept.master.username ||
+            dept.master.email.split('@')[0]) : '未設定' %>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- 所属メンバー設定フォーム -->
-    <div class="card">
+      <!-- 所属メンバー設定フォーム -->
+      <div class="card">
         <h2>所属メンバーの設定</h2>
         <form action="/departments/<%= dept.id %>/members" method="POST">
-            <label class="section-label">この部署に所属させるユーザーを選択</label>
-            <p class="help-text">チェックを入れたユーザーが「<%= dept.name %>」のメンバーになります。</p>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem;">
-                <% allUsers.forEach(user => { 
-                    const isChecked = memberIds.includes(user.id);
-                %>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: #f8fafc;">
-                        <input type="checkbox" name="memberUserIds" value="<%= user.id %>" <%= isChecked ? 'checked' : '' %> style="width: auto; margin: 0;">
-                        <span>
-                            <strong><%= user.username || user.email.split('@')[0] %></strong>
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">(<%= user.email %>)</span>
-                        </span>
-                    </label>
-                <% }) %>
-            </div>
-            <button type="submit" class="btn btn-primary">メンバー設定を保存</button>
+          <label class="section-label"
+            >この部署に所属させるユーザーを選択</label
+          >
+          <p class="help-text">
+            チェックを入れたユーザーが「<%= dept.name %>」のメンバーになります。
+          </p>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+              margin-bottom: 1.25rem;
+            "
+          >
+            <% allUsers.forEach(user => { const isChecked =
+            memberIds.includes(user.id); %>
+            <label class="member-option">
+              <% if (isChecked) { %>
+              <input
+                type="checkbox"
+                name="memberUserIds"
+                value="<%= user.id %>"
+                class="member-checkbox"
+                checked
+              />
+              <% } else { %>
+              <input
+                type="checkbox"
+                name="memberUserIds"
+                value="<%= user.id %>"
+                class="member-checkbox"
+              />
+              <% } %>
+              <span>
+                <strong
+                  ><%= user.username || user.email.split('@')[0] %></strong
+                >
+                <span class="member-email">(<%= user.email %>)</span>
+              </span>
+            </label>
+            <% }) %>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            メンバー設定を保存
+          </button>
         </form>
-    </div>
+      </div>
 
-    <!-- マスター移譲フォーム -->
-    <div class="card">
+      <!-- マスター移譲フォーム -->
+      <div class="card">
         <h2>マスターユーザーを変更</h2>
 
         <% if (candidateUsers.length === 0) { %>
-            <p class="no-members">
-                移譲できる他のユーザーがまだ登録されていません。
-            </p>
+        <p class="no-members">
+          移譲できる他のユーザーがまだ登録されていません。
+        </p>
         <% } else { %>
-            <form action="/departments/<%= dept.id %>/master" method="POST" onsubmit="return confirm('マスターを変更すると、あなたの管理権限が新しいユーザーに移譲されます。よろしいですか？')">
-                <label class="section-label" for="newMasterId">新しいマスターユーザーを選択</label>
-                <p class="help-text">登録済みの全ユーザーから新しい管理者を選択できます（自動的に所属メンバーにも追加されます）。</p>
-                <select name="newMasterId" id="newMasterId" required>
-                    <% candidateUsers.forEach(user => { %>
-                        <option value="<%= user.id %>">
-                            <%= user.username || user.email.split('@')[0] %> (<%= user.email %>)
-                        </option>
-                    <% }) %>
-                </select>
-                <button type="submit" class="btn btn-warning">マスターを移譲する</button>
-            </form>
+        <form
+          action="/departments/<%= dept.id %>/master"
+          method="POST"
+          onsubmit="
+            return confirm(
+              'マスターを変更すると、あなたの管理権限が新しいユーザーに移譲されます。よろしいですか？',
+            );
+          "
+        >
+          <label class="section-label" for="newMasterId"
+            >新しいマスターユーザーを選択</label
+          >
+          <p class="help-text">
+            登録済みの全ユーザーから新しい管理者を選択できます（自動的に所属メンバーにも追加されます）。
+          </p>
+          <select name="newMasterId" id="newMasterId" required>
+            <% candidateUsers.forEach(user => { %>
+            <option value="<%= user.id %>">
+              <%= user.username || user.email.split('@')[0] %> (<%= user.email
+              %>)
+            </option>
+            <% }) %>
+          </select>
+          <button type="submit" class="btn btn-warning">
+            マスターを移譲する
+          </button>
+        </form>
         <% } %>
-    </div>
+      </div>
 
-    <% } %>
-</div>
-</body>
+      <% } %>
+    </div>
+  </body>
 </html>

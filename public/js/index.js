@@ -122,3 +122,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     applyFilters();
 });
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".edit-btn");
+  if (!btn) return;
+  const { id, title, date, time, period, departmentId } = btn.dataset;
+  openEditModal(Number(id), title, date, time, period, departmentId);
+});

@@ -1,7 +1,9 @@
-.card { max-width: 420px; }
+.card {
+  max-width: 420px;
+}
 
 .footer-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }

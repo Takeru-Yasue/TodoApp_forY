@@ -7,40 +7,40 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
-} from 'typeorm';
-import { Todo } from '../../todos/entities/todo.entity';
-import { Department } from '../../departments/entities/department.entity';
+} from "typeorm";
+import { Todo } from "../../todos/entities/todo.entity";
+import { Department } from "../../departments/entities/department.entity";
 
-@Entity('users')
+@Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({ type: "varchar", unique: true })
+  email!: string;
 
-  @Column({ nullable: true })
-  username?: string;
+  @Column({ type: "varchar", nullable: true })
+  username?: string | null;
 
   @Column()
-  password: string;
+  password!: string;
 
   @OneToMany(() => Todo, (todo) => todo.user)
-  todos: Todo[];
+  todos?: Todo[];
 
   @ManyToMany(() => Department, (department) => department.users, {
     eager: false,
   })
   @JoinTable({
-    name: 'user_departments',
-    joinColumn: { name: 'userId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'departmentId', referencedColumnName: 'id' },
+    name: "user_departments",
+    joinColumn: { name: "userId", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "departmentId", referencedColumnName: "id" },
   })
-  departments: Department[];
+  departments?: Department[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

@@ -1,10 +1,10 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DepartmentsService } from './departments.service';
-import { DepartmentsController } from './departments.controller';
-import { Department } from './entities/department.entity';
-import { User } from '../users/entities/user.entity';
-import { UsersModule } from '../users/users.module';
+import { Module, forwardRef } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { DepartmentsService } from "./departments.service";
+import { DepartmentsController } from "./departments.controller";
+import { Department } from "./entities/department.entity";
+import { User } from "../users/entities/user.entity";
+import { UsersModule } from "../users/users.module";
 
 @Module({
   imports: [
@@ -16,4 +16,3 @@ import { UsersModule } from '../users/users.module';
   exports: [DepartmentsService],
 })
 export class DepartmentsModule {}
-

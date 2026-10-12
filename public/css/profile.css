@@ -1,53 +1,71 @@
-.card { max-width: 480px; }
-.header h1 { margin-bottom: 0.25rem; }
-.form-group { margin-bottom: 1.5rem; }
+.card {
+  max-width: 480px;
+}
+
+.header h1 {
+  margin-bottom: 0.25rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
 
 .user-info {
-    background: #f8fafc;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.875rem;
-    color: var(--text-muted);
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
 }
-.user-info strong { color: var(--text-main); }
 
-.form-group label.group-label { margin-bottom: 0.75rem; }
+.user-info strong {
+  color: var(--text-main);
+}
+
+.form-group label.group-label {
+  margin-bottom: 0.75rem;
+}
 
 .dept-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.5rem;
 }
+
 .dept-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
-    font-size: 0.875rem;
-    user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+  font-size: 0.875rem;
+  user-select: none;
 }
+
 .dept-checkbox:hover,
 .dept-checkbox.checked {
-    border-color: var(--primary);
-    background: #eef2ff;
+  border-color: var(--primary);
+  background: #eef2ff;
 }
+
 .dept-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--primary);
-    cursor: pointer;
-    flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .no-dept {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    font-style: italic;
-    padding: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 0.5rem 0;
 }

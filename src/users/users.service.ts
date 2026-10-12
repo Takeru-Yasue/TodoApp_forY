@@ -3,13 +3,13 @@ import {
   ConflictException,
   InternalServerErrorException,
   OnModuleInit,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { Department } from '../departments/entities/department.entity';
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import * as bcrypt from "bcrypt";
+import { User } from "./entities/user.entity";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { Department } from "../departments/entities/department.entity";
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -23,31 +23,31 @@ export class UsersService implements OnModuleInit {
   }
 
   private async seedAdminUser() {
-    const adminEmail = 'admin@ad.com';
+    const adminEmail = "admin@ad.com";
     const existingAdmin = await this.userRepository.findOne({
       where: { email: adminEmail },
     });
 
     if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash('admin1904', 10);
+      const hashedPassword = await bcrypt.hash("admin1904", 10);
       const admin = this.userRepository.create({
-        username: 'administrator',
+        username: "administrator",
         email: adminEmail,
         password: hashedPassword,
       });
       await this.userRepository.save(admin);
-      console.log('初期管理者ユーザー (administrator) を作成しました。');
+      console.log("初期管理者ユーザー (administrator) を作成しました。");
     }
   }
 
-  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+  async create(createUserDto: CreateUserDto): Promise<Omit<User, "password">> {
     const { email, password, username } = createUserDto;
 
     const existingUser = await this.userRepository.findOne({
       where: { email },
     });
     if (existingUser) {
-      throw new ConflictException('このメールアドレスは既に登録されています。');
+      throw new ConflictException("このメールアドレスは既に登録されています。");
     }
 
     try {
@@ -57,7 +57,7 @@ export class UsersService implements OnModuleInit {
       const user = this.userRepository.create({
         email,
         password: hashedPassword,
-        username: username || undefined,
+        username: username ?? undefined,
       });
 
       const savedUser = await this.userRepository.save(user);
@@ -65,14 +65,14 @@ export class UsersService implements OnModuleInit {
       // パスワードを除いて返す
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...result } = savedUser;
-      return result as Omit<User, 'password'>;
+      return result;
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error;
       }
-      console.error('Error creating user:', error);
+      console.error("Error creating user:", error);
       throw new InternalServerErrorException(
-        'ユーザー登録処理中にエラーが発生しました。',
+        "ユーザー登録処理中にエラーが発生しました。",
       );
     }
   }
@@ -83,7 +83,7 @@ export class UsersService implements OnModuleInit {
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find({
-      order: { username: 'ASC', email: 'ASC' },
+      order: { username: "ASC", email: "ASC" },
     });
   }
 
@@ -94,14 +94,17 @@ export class UsersService implements OnModuleInit {
   async findByIdWithDepartments(id: number): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
-      relations: ['departments'],
+      relations: ["departments"],
     });
   }
 
-  async setDepartments(userId: number, departments: Department[]): Promise<void> {
+  async setDepartments(
+    userId: number,
+    departments: Department[],
+  ): Promise<void> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['departments'],
+      relations: ["departments"],
     });
     if (!user) return;
     user.departments = departments;
@@ -111,7 +114,7 @@ export class UsersService implements OnModuleInit {
   async validateUser(
     email: string,
     password: string,
-  ): Promise<Omit<User, 'password'> | null> {
+  ): Promise<Omit<User, "password"> | null> {
     const user = await this.findByEmail(email);
     if (!user) {
       return null;
@@ -124,7 +127,6 @@ export class UsersService implements OnModuleInit {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...result } = user;
-    return result as Omit<User, 'password'>;
+    return result;
   }
 }
-
