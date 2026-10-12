@@ -14,19 +14,19 @@ import { Department } from '../../departments/entities/department.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column({ nullable: true })
-  username?: string;
+  username?: string | null;
 
   @Column()
-  password: string;
+  password!: string;
 
   @OneToMany(() => Todo, (todo) => todo.user)
-  todos: Todo[];
+  todos?: Todo[];
 
   @ManyToMany(() => Department, (department) => department.users, {
     eager: false,
@@ -36,11 +36,11 @@ export class User {
     joinColumn: { name: 'userId', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'departmentId', referencedColumnName: 'id' },
   })
-  departments: Department[];
+  departments?: Department[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
