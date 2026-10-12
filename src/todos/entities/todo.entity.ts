@@ -13,40 +13,40 @@ import { Department } from '../../departments/entities/department.entity';
 @Entity()
 export class Todo {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  title: string;
+  title!: string;
 
   @Column()
-  dueDate: Date;
+  dueDate!: Date;
 
   @Column({ nullable: true })
-  period: string;
+  period?: string | null;
 
   @Column({ nullable: true })
-  userId: number;
+  userId?: number | null;
 
   @ManyToOne(() => User, (user) => user.todos, {
     onDelete: 'CASCADE',
     nullable: true,
   })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user?: User | null;
 
   @Column({ nullable: true })
-  departmentId: number | null;
+  departmentId?: number | null;
 
   @ManyToOne(() => Department, {
     onDelete: 'SET NULL',
     nullable: true,
   })
   @JoinColumn({ name: 'departmentId' })
-  department: Department | null;
+  department?: Department | null;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
