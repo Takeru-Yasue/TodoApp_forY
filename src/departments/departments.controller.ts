@@ -16,7 +16,7 @@ import { CreateDepartmentDto } from "./dto/create-department.dto";
 import { UsersService } from "../users/users.service";
 import { AuthenticatedGuard } from "../users/guards/authenticated.guard";
 import { User } from "../users/entities/user.entity";
-import { CurrentUser } from "src/users/decorator/current-user.decorator";
+import { CurrentUser } from "src/users/decorators/current-user.decorator";
 import { HttpException } from "@nestjs/common";
 import { UpdateMembersDto } from "./dto/update-members.dto";
 

@@ -17,7 +17,7 @@ import { RegisterValidationFilter } from "./register-validation.filter";
 import { DepartmentsService } from "../departments/departments.service";
 import { AuthenticatedGuard } from "./guards/authenticated.guard";
 import { User } from "./entities/user.entity";
-import { CurrentUser } from "./decorator/current-user.decorator";
+import { CurrentUser } from "./decorators/current-user.decorator";
 import { DepartmentIdsDto } from "./dto/departments-ids.dto";
 
 const AUTH_COOKIE_NAME = "userId";

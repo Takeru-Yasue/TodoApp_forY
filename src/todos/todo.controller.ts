@@ -11,7 +11,7 @@ import * as express from "express";
 import { TodosService } from "./todos.service";
 import { AuthenticatedGuard } from "../users/guards/authenticated.guard";
 import { User } from "../users/entities/user.entity";
-import { CurrentUser } from "src/users/decorator/current-user.decorator";
+import { CurrentUser } from "src/users/decorators/current-user.decorator";
 import { UpdateTodoDto } from "./dto/update-todo.dto";
 
 @Controller("todo")
