@@ -12,7 +12,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   // Cookieパーサー（署名シークレットキーを設定）
-  app.use(cookieParser(process.env.COOKIE_SECRET || "todo-app-secret-key"));
+  app.use(cookieParser(process.env.COOKIE_SECRET ?? "todo-app-secret-key"));
 
   // HTMLフォームで PATCH や DELETE を使うための設定
   app.use(methodOverride("_method"));
@@ -23,6 +23,6 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap().catch((err) => {
+bootstrap().catch((err: unknown) => {
   console.error(err);
 });
