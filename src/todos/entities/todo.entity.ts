@@ -6,9 +6,9 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Department } from '../../departments/entities/department.entity';
+} from "typeorm";
+import { User } from "../../users/entities/user.entity";
+import { Department } from "../../departments/entities/department.entity";
 
 @Entity()
 export class Todo {
@@ -21,27 +21,27 @@ export class Todo {
   @Column()
   dueDate!: Date;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   period?: string | null;
 
   @Column({ nullable: true })
   userId?: number | null;
 
   @ManyToOne(() => User, (user) => user.todos, {
-    onDelete: 'CASCADE',
+    onDelete: "CASCADE",
     nullable: true,
   })
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: "userId" })
   user?: User | null;
 
   @Column({ nullable: true })
   departmentId?: number | null;
 
   @ManyToOne(() => Department, {
-    onDelete: 'SET NULL',
+    onDelete: "SET NULL",
     nullable: true,
   })
-  @JoinColumn({ name: 'departmentId' })
+  @JoinColumn({ name: "departmentId" })
   department?: Department | null;
 
   @CreateDateColumn()

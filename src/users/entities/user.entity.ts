@@ -7,19 +7,19 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
-} from 'typeorm';
-import { Todo } from '../../todos/entities/todo.entity';
-import { Department } from '../../departments/entities/department.entity';
+} from "typeorm";
+import { Todo } from "../../todos/entities/todo.entity";
+import { Department } from "../../departments/entities/department.entity";
 
-@Entity('users')
+@Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: "varchar", unique: true })
   email!: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: "varchar", nullable: true })
   username?: string | null;
 
   @Column()
@@ -32,9 +32,9 @@ export class User {
     eager: false,
   })
   @JoinTable({
-    name: 'user_departments',
-    joinColumn: { name: 'userId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'departmentId', referencedColumnName: 'id' },
+    name: "user_departments",
+    joinColumn: { name: "userId", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "departmentId", referencedColumnName: "id" },
   })
   departments?: Department[];
 

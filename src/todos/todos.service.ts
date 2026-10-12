@@ -1,10 +1,10 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
-import { CreateTodoDto } from './dto/create-todo.dto';
-import { UpdateTodoDto } from './dto/update-todo.dto';
-import { Todo } from './entities/todo.entity';
-import { User } from '../users/entities/user.entity';
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, In } from "typeorm";
+import { CreateTodoDto } from "./dto/create-todo.dto";
+import { UpdateTodoDto } from "./dto/update-todo.dto";
+import { Todo } from "./entities/todo.entity";
+import { User } from "../users/entities/user.entity";
 
 @Injectable()
 export class TodosService {
@@ -18,23 +18,23 @@ export class TodosService {
   async create(createTodoDto: CreateTodoDto, userId?: number) {
     try {
       let dueDate: Date;
-      if (createTodoDto['date'] && createTodoDto['time']) {
-        dueDate = new Date(`${createTodoDto['date']} ${createTodoDto['time']}`);
+      if (createTodoDto.date && createTodoDto.time) {
+        dueDate = new Date(`${createTodoDto.date} ${createTodoDto.time}`);
       } else {
         dueDate = new Date();
       }
 
-      const inputPeriod = String(createTodoDto.period || '')
+      const inputPeriod = String(createTodoDto.period || "")
         .trim()
         .toLowerCase();
-      let finalPeriod = '';
+      let finalPeriod = "";
 
-      if (inputPeriod === 'auto') {
+      if (inputPeriod === "auto") {
         finalPeriod = this.calculatePeriod(dueDate);
-      } else if (inputPeriod === 'none' || inputPeriod === '') {
-        finalPeriod = '';
+      } else if (inputPeriod === "none" || inputPeriod === "") {
+        finalPeriod = "";
       } else {
-        finalPeriod = createTodoDto.period || ''; // 元の文字列（漢字など）を維持
+        finalPeriod = createTodoDto.period || ""; // 元の文字列（漢字など）を維持
       }
 
       const deptId = createTodoDto.departmentId
@@ -51,9 +51,9 @@ export class TodosService {
 
       return await this.todoRepository.save(todo);
     } catch (error) {
-      console.error('Error creating todo:', error);
+      console.error("Error creating todo:", error);
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(errorMessage);
     }
   }
@@ -65,25 +65,25 @@ export class TodosService {
     const totalMinutes = hours * 60 + minutes;
 
     // 共通スケジュール (~ 14:55)
-    if (totalMinutes <= 8 * 60 + 15) return '朝';
-    if (totalMinutes <= 9 * 60 + 15) return '1';
-    if (totalMinutes <= 10 * 60 + 15) return '2';
-    if (totalMinutes <= 11 * 60 + 15) return '3';
-    if (totalMinutes <= 12 * 60 + 15) return '4';
-    if (totalMinutes <= 13 * 60 + 5) return '昼';
-    if (totalMinutes <= 13 * 60 + 55) return '5';
-    if (totalMinutes <= 14 * 60 + 55) return '6';
+    if (totalMinutes <= 8 * 60 + 15) return "朝";
+    if (totalMinutes <= 9 * 60 + 15) return "1";
+    if (totalMinutes <= 10 * 60 + 15) return "2";
+    if (totalMinutes <= 11 * 60 + 15) return "3";
+    if (totalMinutes <= 12 * 60 + 15) return "4";
+    if (totalMinutes <= 13 * 60 + 5) return "昼";
+    if (totalMinutes <= 13 * 60 + 55) return "5";
+    if (totalMinutes <= 14 * 60 + 55) return "6";
 
     // 曜日別スケジュール (14:55以降)
     const isSpecialDay = day === 2 || day === 4 || day === 5; // 火, 木, 金
 
     if (isSpecialDay) {
       // 火, 木, 金: 15:05 ~ 15:55 (7), 15:55 ~ 放課後
-      if (totalMinutes <= 15 * 60 + 55) return '7';
-      return '放課後';
+      if (totalMinutes <= 15 * 60 + 55) return "7";
+      return "放課後";
     } else {
       // 月, 水, 土, 日: 14:55 ~ 放課後
-      return '放課後';
+      return "放課後";
     }
   }
 
@@ -94,17 +94,14 @@ export class TodosService {
       if (userId !== undefined) {
         const user = await this.userRepository.findOne({
           where: { id: userId },
-          relations: ['departments'],
+          relations: ["departments"],
         });
 
         const deptIds = (user?.departments ?? []).map((d) => d.id);
 
         if (deptIds.length > 0) {
           // 自分の個人のTodo OR 自分が所属する部署のTodo
-          whereConditions = [
-            { userId },
-            { departmentId: In(deptIds) },
-          ];
+          whereConditions = [{ userId }, { departmentId: In(deptIds) }];
         } else {
           whereConditions = { userId };
         }
@@ -112,16 +109,16 @@ export class TodosService {
 
       return await this.todoRepository.find({
         where: whereConditions,
-        relations: ['user', 'department'],
+        relations: ["user", "department"],
         order: {
-          dueDate: 'ASC',
-          period: 'ASC',
+          dueDate: "ASC",
+          period: "ASC",
         },
       });
     } catch (error) {
-      console.error('Error fetching todos:', error);
+      console.error("Error fetching todos:", error);
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(errorMessage);
     }
   }
@@ -129,7 +126,7 @@ export class TodosService {
   async findOne(id: number) {
     return await this.todoRepository.findOne({
       where: { id },
-      relations: ['user', 'department'],
+      relations: ["user", "department"],
     });
   }
 
@@ -140,13 +137,13 @@ export class TodosService {
     if (userId) {
       const user = await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['departments'],
+        relations: ["departments"],
       });
       const userDeptIds = (user?.departments ?? []).map((d) => d.id);
       const isOwner = todo.userId === userId;
       const isMemberOfDept =
         todo.departmentId && userDeptIds.includes(todo.departmentId);
-      const isAdmin = user?.email === 'admin@ad.com';
+      const isAdmin = user?.email === "admin@ad.com";
 
       if (!isOwner && !isMemberOfDept && !isAdmin) {
         return null;
@@ -158,15 +155,15 @@ export class TodosService {
       dueDate = new Date(`${updateTodoDto.date} ${updateTodoDto.time}`);
     }
 
-    const inputPeriod = String(updateTodoDto.period || '')
+    const inputPeriod = String(updateTodoDto.period || "")
       .trim()
       .toLowerCase();
     let finalPeriod = todo.period;
 
-    if (inputPeriod === 'auto') {
+    if (inputPeriod === "auto") {
       finalPeriod = this.calculatePeriod(dueDate);
-    } else if (inputPeriod === 'none') {
-      finalPeriod = '';
+    } else if (inputPeriod === "none") {
+      finalPeriod = "";
     } else if (updateTodoDto.period !== undefined) {
       finalPeriod = updateTodoDto.period;
     }
@@ -195,10 +192,10 @@ export class TodosService {
 
       const user = await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['departments'],
+        relations: ["departments"],
       });
 
-      if (user?.email === 'admin@ad.com') {
+      if (user?.email === "admin@ad.com") {
         return await this.todoRepository.delete(id);
       }
 

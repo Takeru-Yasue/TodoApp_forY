@@ -7,31 +7,31 @@ import {
   ManyToMany,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+} from "typeorm";
+import { User } from "../../users/entities/user.entity";
 
-@Entity('departments')
+@Entity("departments")
 export class Department {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar',  unique: true })
+  @Column({ type: "varchar", unique: true })
   name!: string;
 
-  @Column({ type: 'varchar',  nullable: true })
-  description?: string| null;
+  @Column({ type: "varchar", nullable: true })
+  description?: string | null;
 
   /** 部署を管理できるマスターユーザーのID */
-  @Column({ type: 'varchar',  nullable: true })
+  @Column({ type: "varchar", nullable: true })
   masterId?: number | null;
 
   /** マスターユーザー（削除時は NULL に） */
-  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL', eager: false })
-  @JoinColumn({ name: 'masterId' })
-  master?: User| null;
+  @ManyToOne(() => User, { nullable: true, onDelete: "SET NULL", eager: false })
+  @JoinColumn({ name: "masterId" })
+  master?: User | null;
 
   @ManyToMany(() => User, (user) => user.departments)
-  users?: User[]| null;
+  users?: User[] | null;
 
   @CreateDateColumn()
   createdAt!: Date;
@@ -39,4 +39,3 @@ export class Department {
   @UpdateDateColumn()
   updatedAt!: Date;
 }
-

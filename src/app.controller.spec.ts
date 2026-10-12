@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { Response } from 'express';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { Response } from "express";
 
-describe('AppController', () => {
+describe("AppController", () => {
   let appController: AppController;
 
   beforeEach(async () => {
@@ -15,13 +15,13 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
+  describe("root", () => {
     it('should redirect to "/todos"', () => {
       const mockResponse = {
         redirect: jest.fn(),
       };
       appController.root(mockResponse as unknown as Response);
-      expect(mockResponse.redirect).toHaveBeenCalledWith('/todos');
+      expect(mockResponse.redirect).toHaveBeenCalledWith("/todos");
     });
   });
 });

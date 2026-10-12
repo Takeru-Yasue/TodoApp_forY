@@ -3,12 +3,12 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
-import { Department } from './entities/department.entity';
-import { CreateDepartmentDto } from './dto/create-department.dto';
-import { User } from '../users/entities/user.entity';
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, In } from "typeorm";
+import { Department } from "./entities/department.entity";
+import { CreateDepartmentDto } from "./dto/create-department.dto";
+import { User } from "../users/entities/user.entity";
 
 @Injectable()
 export class DepartmentsService {
@@ -22,15 +22,15 @@ export class DepartmentsService {
   /** 全部署一覧（master ユーザー情報付き） */
   async findAll(): Promise<Department[]> {
     return this.departmentRepository.find({
-      relations: ['master'],
-      order: { name: 'ASC' },
+      relations: ["master"],
+      order: { name: "ASC" },
     });
   }
 
   async findOne(id: number): Promise<Department> {
     const dept = await this.departmentRepository.findOne({
       where: { id },
-      relations: ['master'],
+      relations: ["master"],
     });
     if (!dept) {
       throw new NotFoundException(`部署ID ${id} が見つかりません`);
@@ -42,7 +42,7 @@ export class DepartmentsService {
   async findOneWithMembers(id: number): Promise<Department> {
     const dept = await this.departmentRepository.findOne({
       where: { id },
-      relations: ['master', 'users'],
+      relations: ["master", "users"],
     });
     if (!dept) {
       throw new NotFoundException(`部署ID ${id} が見つかりません`);
@@ -56,12 +56,15 @@ export class DepartmentsService {
   }
 
   /** 部署を作成し、作成者をマスターに設定すると同時に所属メンバーに追加する */
-  async create(dto: CreateDepartmentDto, masterId: number): Promise<Department> {
+  async create(
+    dto: CreateDepartmentDto,
+    masterId: number,
+  ): Promise<Department> {
     const existing = await this.departmentRepository.findOne({
       where: { name: dto.name },
     });
     if (existing) {
-      throw new ConflictException('同名の部署が既に存在します');
+      throw new ConflictException("同名の部署が既に存在します");
     }
     const dept = this.departmentRepository.create({ ...dto, masterId });
     const savedDept = await this.departmentRepository.save(dept);
@@ -69,7 +72,7 @@ export class DepartmentsService {
     // 作成者を自動的に部署の所属メンバーに追加する
     const user = await this.userRepository.findOne({
       where: { id: masterId },
-      relations: ['departments'],
+      relations: ["departments"],
     });
     if (user) {
       if (!user.departments) user.departments = [];
@@ -90,13 +93,13 @@ export class DepartmentsService {
   ): Promise<Department> {
     const dept = await this.findOne(id);
     if (dept.masterId !== requesterId) {
-      throw new ForbiddenException('この操作はマスターユーザーのみ行えます');
+      throw new ForbiddenException("この操作はマスターユーザーのみ行えます");
     }
     if (dto.name && dto.name !== dept.name) {
       const existing = await this.departmentRepository.findOne({
         where: { name: dto.name },
       });
-      if (existing) throw new ConflictException('同名の部署が既に存在します');
+      if (existing) throw new ConflictException("同名の部署が既に存在します");
     }
     Object.assign(dept, dto);
     return this.departmentRepository.save(dept);
@@ -109,9 +112,11 @@ export class DepartmentsService {
     requester: User,
   ): Promise<Department> {
     const dept = await this.findOneWithMembers(id);
-    const isAdmin = requester.email === 'admin@ad.com';
+    const isAdmin = requester.email === "admin@ad.com";
     if (!isAdmin && dept.masterId !== requester.id) {
-      throw new ForbiddenException('この操作はマスターユーザーまたは管理者のみ行えます');
+      throw new ForbiddenException(
+        "この操作はマスターユーザーまたは管理者のみ行えます",
+      );
     }
 
     const members = await this.userRepository.find({
@@ -129,17 +134,19 @@ export class DepartmentsService {
     requester: User,
   ): Promise<Department> {
     const dept = await this.findOne(id);
-    const isAdmin = requester.email === 'admin@ad.com';
+    const isAdmin = requester.email === "admin@ad.com";
     if (!isAdmin && dept.masterId !== requester.id) {
-      throw new ForbiddenException('この操作はマスターユーザーまたは管理者のみ行えます');
+      throw new ForbiddenException(
+        "この操作はマスターユーザーまたは管理者のみ行えます",
+      );
     }
 
     const newMaster = await this.userRepository.findOne({
       where: { id: newMasterId },
-      relations: ['departments'],
+      relations: ["departments"],
     });
     if (!newMaster) {
-      throw new NotFoundException('指定されたユーザーが存在しません');
+      throw new NotFoundException("指定されたユーザーが存在しません");
     }
 
     dept.masterId = newMasterId;
@@ -158,11 +165,12 @@ export class DepartmentsService {
   /** 部署を削除（マスターまたは管理者のみ） */
   async remove(id: number, requester: User): Promise<void> {
     const dept = await this.findOne(id);
-    const isAdmin = requester.email === 'admin@ad.com';
+    const isAdmin = requester.email === "admin@ad.com";
     if (!isAdmin && dept.masterId !== requester.id) {
-      throw new ForbiddenException('この操作はマスターユーザーまたは管理者のみ行えます');
+      throw new ForbiddenException(
+        "この操作はマスターユーザーまたは管理者のみ行えます",
+      );
     }
     await this.departmentRepository.delete(id);
   }
 }
-

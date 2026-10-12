@@ -7,15 +7,15 @@ import {
   Res,
   Req,
   UseGuards,
-} from '@nestjs/common';
-import * as express from 'express';
-import { TodosService } from './todos.service';
-import { CreateTodoDto } from './dto/create-todo.dto';
-import { UsersService } from '../users/users.service';
-import { User } from '../users/entities/user.entity';
-import { AuthenticatedGuard } from '../users/guards/authenticated.guard';
+} from "@nestjs/common";
+import * as express from "express";
+import { TodosService } from "./todos.service";
+import { CreateTodoDto } from "./dto/create-todo.dto";
+import { UsersService } from "../users/users.service";
+import { User } from "../users/entities/user.entity";
+import { AuthenticatedGuard } from "../users/guards/authenticated.guard";
 
-@Controller('todos')
+@Controller("todos")
 export class TodosController {
   constructor(
     private readonly todosService: TodosService,
@@ -23,7 +23,7 @@ export class TodosController {
   ) {}
 
   @Get()
-  @Render('index')
+  @Render("index")
   async findAll(@Req() req: express.Request) {
     const rawUserId = req.signedCookies?.userId;
     const userId = rawUserId ? parseInt(rawUserId, 10) : undefined;
@@ -48,6 +48,6 @@ export class TodosController {
   ) {
     const user = (req as any).user as User;
     await this.todosService.create(createTodoDto, user.id);
-    return res.redirect('/todos');
+    res.redirect("/todos");
   }
 }
